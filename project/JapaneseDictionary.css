@@ -1,0 +1,17 @@
+@charset "UTF-8";
+@namespace d url(http://www.apple.com/DTDs/DictionaryService-1.0.rng);
+
+.pos_indicator {
+	width: min-content;
+	height: min-content;
+	white-space: nowrap;
+	background: lightgray;
+	border-radius: 2px;
+	font-size: x-small;
+}
+
+.definitionSpecifier {
+	background:green;
+	height: 10px;
+	width: 10px;
+}
