@@ -1,0 +1,87 @@
+<body>
+
+    <!-- Title -->
+    {% if entry.readings | count == 2 and entry.readings[1].reading != entry.title %}
+    <h1 class="title titleWithReading">
+        {{ entry.title }} 「{{ entry.readings[1].reading }}」
+    </h1>
+    {% else %}
+    <h1 class="title">
+        {{ entry.title }}
+    </h1>
+    {% endif %}
+
+    <!-- Readings -->
+    {% if entry.readings | count > 2 %}
+    <div class="readingsContainer">
+        <span class="containerHeader">
+            {% if entry.readings | count == 2 %}
+            Reading
+            {% else %}
+            Readings
+            {% endif %}
+        </span>
+        {% for reading in entry.readings %}
+        {% if reading.reading != entry.title %}
+        <div class="containerItem">
+            {% for related in reading.relates_to %}
+            <div class="relatesTo">（{{ related }}）</div>
+            {% endfor %}
+            <div class="reading">{{ reading.reading }}</div>
+            {% if not reading.is_true_reading %}
+            <div class="untrueReading">Reference Only</div>
+            {% endif %}
+        </div>
+        {% endif %}
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Definitions -->
+    <div class="definitions">
+        <span class="containerHeader">
+            {% if entry.definitions | count == 1 %}
+            Definition
+            {% else %}
+            Definitions
+            {% endif %}
+        </span>
+
+        {% for definition_group in entry.definitions %}
+        {% if definition_group.part_of_speech != [] or definition_group.field != [] or definition_group.dialect != [] %}
+        {% for pos in definition_group.part_of_speech %}
+        <div class="subContainerItem partOfSpeech">
+            {{ pos }}
+        </div>
+        {% endfor %}
+        {% for field in definition_group.field %}
+        <div class="subContainerItem field">
+            {{ field }}
+        </div>
+        {% endfor %}
+        {% for dialect in definition_group.dialect %}
+        <div class="subContainerItem dialect">
+            {{ dialect }}
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        <div class="containerItem">
+            {% if loop.length > 1 %}
+            <div class="subContainerItem definitionIndex">
+                {{ loop.index }}
+            </div>
+            {% endif %}
+            <div class="subContainerItem definition">
+                {{ definition_group.definition | join(", ") }}
+            </div>
+            {% for info in definition_group.sense_info %}
+            <div class="subContainerItem senseInfo">
+                ({{ info }})
+            </div>
+            {% endfor %}
+        </div>
+        {% endfor %}
+    </div>
+
+</body>

@@ -1,4 +1,11 @@
 import xml.etree.ElementTree as ET
+import jaconv
+from jinja2 import Template, Environment, select_autoescape, FileSystemLoader
+
+env = Environment(
+    loader=FileSystemLoader("./entry_templates"),
+    autoescape=select_autoescape(enabled_extensions=('html', 'xml'), default_for_string=True)
+    )
 
 class Dictionary:
     def __init__(self):
@@ -20,6 +27,9 @@ class Dictionary:
         output_tree.write(output_location, encoding="UTF-8", xml_declaration=True)
 
 class Entry:
+    _PERMUTATION_FUNCTIONS = [jaconv.hira2kata, jaconv.kata2hira]
+    _TEMPLATE = env.get_template('standard_entry.html')
+
     def __init__(self, id, title):
         self.id = id
         self.title = title
@@ -29,13 +39,16 @@ class Entry:
         self.root_node = self._create_root_node()
     
     def add_index(self, value):
-        self.indices.append(value)
+        permutations = [x(value) for x in Entry._PERMUTATION_FUNCTIONS]
+        permutations.append(value)
+        permutations = list(set(permutations))
+        self.indices.extend(permutations)
     
-    def add_reading(self, reading, extra_info, is_true_reading=True, relates_to=None):
+    def add_reading(self, reading, extra_info, is_true_reading=True, relates_to=[]):
         reading = Reading(reading, extra_info, is_true_reading, relates_to)
         self.readings.append(reading)
     
-    def add_definition(self, definition=None, cross_reference=None, part_of_speech=None, related_readings=None, antonym=None, field=None, misc_info=None, sense_info=None, language_source=None, dialect=None):
+    def add_definition(self, definition=[], cross_reference=[], part_of_speech=[], related_readings=[], antonym=[], field=[], misc_info=[], sense_info=[], language_source=[], dialect=[]):
         definition = Definition(definition, cross_reference, part_of_speech, related_readings, antonym, field, misc_info, sense_info, language_source, dialect)
         self.definitions.append(definition)
     
@@ -57,43 +70,14 @@ class Entry:
                 attributes["d:anchor"] = "xpointer(//*[@id='{}'])".format(self.id)
             ET.SubElement(self.root_node, "d:index", attributes)
     
-    def _generate_readings(self):
-        if len(self.readings) == 2:
-            readings_element = ET.SubElement(self.root_node, "div", {"class": "reading singular"})
-            readings_element.text = self.readings[1].reading
-        elif len(self.readings) > 2:
-            readings_element = ET.SubElement(self.root_node, "div", {"class": "reading multiple"})
-            for reading in self.readings:
-                reading_element = ET.SubElement(readings_element, "div")
-                reading_element.text = reading.reading
-    
-    def _generate_definitions(self):
-        definitions_container = ET.SubElement(self.root_node, "div", {"class": "definitions"})
-        definitions_group = ET.SubElement(definitions_container, "div", {"class": "definitions all"})
-        last_related_element = []
-        for index, definition in enumerate(self.definitions):
-            if definition.related_readings != last_related_element:
-                last_related_element = definition.related_readings
-                definitions_group = ET.SubElement(definitions_container, "div", {"class": "definitions specific"})
-                related_elements = ET.SubElement(definitions_group, "ul", {"class": "definitionSpecifier"})
-                for reading in definition.related_readings:
-                    reading_element = ET.SubElement(related_elements, "li")
-                    reading_element.text = reading
-            definition_sublist_container = ET.SubElement(definitions_container, "div")
-            if len(self.definitions) != 1:
-                definition_index_element = ET.SubElement(definition_sublist_container, "div", {"class": "definitionIndex"})
-                definition_index_element.text = str(index + 1)
-            definition_sublist_element = ET.SubElement(definition_sublist_container, "ul", {"class": "definition"})
-            for sub_def in definition.definition:
-                definition_element = ET.SubElement(definition_sublist_element, "li")
-                definition_element.text = sub_def
-    
     def _compile_page(self):
-        title_element = ET.SubElement(self.root_node, "h1", {"class": "title"})
-        title_element.text = self.title
-
-        self._generate_readings()
-        self._generate_definitions()
+        page_text = self._TEMPLATE.render(entry=self)
+        try:
+            element_subtree = ET.fromstring(page_text)
+        except ET.ParseError as e:
+            print(page_text)
+            raise e
+        self.root_node.append(element_subtree)
 
 
     def compile_entry(self):
@@ -109,8 +93,6 @@ class Reading:
         self.is_true_reading = is_true_reading
         self.extra_info = extra_info
         self.relates_to = relates_to
-        if self.relates_to == []:
-            self.relates_to = None
 
 
 class Definition:

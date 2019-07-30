@@ -1,17 +1,55 @@
 @charset "UTF-8";
 @namespace d url(http://www.apple.com/DTDs/DictionaryService-1.0.rng);
 
-.pos_indicator {
-	width: min-content;
-	height: min-content;
-	white-space: nowrap;
-	background: lightgray;
-	border-radius: 2px;
-	font-size: x-small;
+.title {
+  font-size: x-large;
 }
 
-.definitionSpecifier {
-	background:green;
-	height: 10px;
-	width: 10px;
+.readingsContainer {
+  width: 80%;
+  max-width: 300px;
+  padding: 5px 10px;
+  background: lightgrey;
+  border-radius: 5px;
+}
+
+.reading {
+  padding-top: 5px;
+  padding-left: 15px;
+}
+
+.containerHeader {
+  font-size: small;
+  margin-bottom: 0;
+  text-decoration: underline;
+}
+
+.definitions {
+  padding: 5px 10px;
+}
+
+.definitions .containerItem {
+  margin: 10px 0;
+  display: grid;
+  grid-template-columns: 30px auto;
+}
+
+.subContainerItem.definition {
+  grid-column: 2;
+}
+
+.subContainerItem.definitionIndex {
+  grid-column: 1;
+  color: grey;
+  text-align: right;
+  padding-right: 5px;
+  font-size: smaller;
+}
+
+.subContainerItem.senseInfo {
+  grid-column: 2;
+}
+
+.subContainerItem.partOfSpeech {
+  width: auto;
 }

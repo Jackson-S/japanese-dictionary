@@ -1,8 +1,8 @@
 import xml.etree.ElementTree as ET
 from DictionaryObjects import *
 
-# input_tree = ET.parse("dictionaries/JMdict_e.xml")
-input_tree = ET.parse("dictionaries/small_dict.xml")
+input_tree = ET.parse("dictionaries/JMdict_e.xml")
+# input_tree = ET.parse("dictionaries/small_dict.xml")
 input_root = input_tree.getroot()
 
 output_dictionary = Dictionary()

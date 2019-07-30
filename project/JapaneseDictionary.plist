@@ -11,24 +11,9 @@
 	<key>CFBundleShortVersionString</key>
 	<string>1.0</string>
 	<key>DCSDictionaryManufacturerName</key>
-	<string>Your Company</string>
-	<key>DCSDictionaryFrontMatterReferenceID</key>
-	<string>front_back_matter</string>
+	<string>JMDict</string>
 	<key>DCSDictionaryPrefsHTML</key>
 	<string>JapaneseDictionary_prefs.html</string>
-	<key>DCSDictionaryXSL</key>
-	<string>JapaneseDictionary_options.xsl</string>
-	<key>DCSDictionaryDefaultPrefs</key>
-	<dict>
-		<key>pronunciation</key>
-		<string>0</string>
-		<key>display-column</key>
-		<string>1</string>
-		<key>display-picture</key>
-		<string>1</string>
-		<key>version</key>
-		<string>1</string>
-	</dict>
 	<key>DCSDictionaryUseSystemAppearance</key>
 	<true/>
 </dict>
