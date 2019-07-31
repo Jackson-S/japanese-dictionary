@@ -2,7 +2,7 @@
 A Japanese -> English dictionary for the Dictionary app in MacOS based off JMdict
 
 ![](/screenshots/a.png)
-![](/screenshots/a.png)
+![](/screenshots/b.png)
 
 <p>
 This package uses the 
