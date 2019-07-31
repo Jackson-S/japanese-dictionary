@@ -13,7 +13,7 @@ DICT_SRC_PATH	=	JapaneseDictionary.xml
 CSS_PATH		=	JapaneseDictionary.css
 PLIST_PATH		=	JapaneseDictionary.plist
 
-DICT_BUILD_OPTS		=
+DICT_BUILD_OPTS		= -v 10.6
 # Suppress adding supplementary key.
 # DICT_BUILD_OPTS		=	-s 0	# Suppress adding supplementary key.
 

@@ -87,13 +87,7 @@ class Entry:
     def _compile_page(self):
         page_text = self._TEMPLATE.render(entry=self)
         minified_page = self._MINIFIER.minify(page_text)
-        if self.title == "赤":
-            print(minified_page)
-        try:
-            element_subtree = ET.fromstring(minified_page, )
-        except ET.ParseError as e:
-            print(minified_page)
-            raise e
+        element_subtree = ET.fromstring(minified_page, )
         for element in element_subtree:
             self.root_node.append(element)
 

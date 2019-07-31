@@ -105,3 +105,10 @@
   padding: 0 5px;
   align-self: center;
 }
+
+@media (prefers-dark-interface)
+{
+	body {
+		color: white;
+	}
+}
