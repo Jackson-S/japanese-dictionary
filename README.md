@@ -1,5 +1,5 @@
-# japanese-dictionary
-A Japanese -> English dictionary for the Dictionary app in MacOS
+# JMdict Japanese Dictionary for MacOS
+A Japanese -> English dictionary for the Dictionary app in MacOS based off JMdict
 
 ![](/screenshots/a.png)
 ![](/screenshots/a.png)
