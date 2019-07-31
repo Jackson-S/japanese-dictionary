@@ -122,4 +122,9 @@ dmypy.json
 # Pyre type checker
 .pyre/
 .DS_Store
-JapaneseDictionarySample.xml
+
+# Dictionary Compilation Output
+objects/
+
+# Translation Output
+project/JapaneseDictionary.xml
