@@ -804,9 +804,16 @@ various information fields.
         </k_ele>
         <k_ele>
             <keb>懸ける</keb>
+            <ke_inf>It's a thing I guess?</ke_inf>
         </k_ele>
         <r_ele>
             <reb>かける</reb>
+            <re_pri>ichi1</re_pri>
+            <re_pri>news1</re_pri>
+            <re_pri>nf20</re_pri>
+        </r_ele>
+        <r_ele>
+            <reb>かけるり</reb>
             <re_pri>ichi1</re_pri>
             <re_pri>news1</re_pri>
             <re_pri>nf20</re_pri>

@@ -1,87 +1,141 @@
 <body>
-
     <!-- Title -->
-    {% if entry.readings | count == 2 and entry.readings[1].reading != entry.title %}
-    <h1 class="title titleWithReading">
-        {{ entry.title }} 「{{ entry.readings[1].reading }}」
-    </h1>
-    {% else %}
-    <h1 class="title">
-        {{ entry.title }}
-    </h1>
-    {% endif %}
-
-    <!-- Readings -->
-    {% if entry.readings | count > 2 %}
-    <div class="readingsContainer">
-        <span class="containerHeader">
-            {% if entry.readings | count == 2 %}
-            Reading
-            {% else %}
-            Readings
-            {% endif %}
-        </span>
-        {% for reading in entry.readings %}
-        {% if reading.reading != entry.title %}
-        <div class="containerItem">
-            {% for related in reading.relates_to %}
-            <div class="relatesTo">（{{ related }}）</div>
-            {% endfor %}
-            <div class="reading">{{ reading.reading }}</div>
-            {% if not reading.is_true_reading %}
-            <div class="untrueReading">Reference Only</div>
-            {% endif %}
+    <div class="titleContainer">
+        <h1 class="containerItem title">
+            {{ entry.title }}
+        </h1>
+        {% if entry.readings | count == 1 and entry.readings[0].reading != entry.title %}
+        <h1 class="containerItem reading">
+            「{{ entry.readings[0].reading }}」
+        </h1>
+        {% endif %}
+        <!-- First Definition Classifier -->
+        {% if entry.definitions[0].part_of_speech != [] or entry.definitions[0].field != [] or entry.definitions[0].dialect != [] %}
+        <div class="verticalFlex badges">
+            <div class="containerItem badges">
+                {% for pos in entry.definitions[0].part_of_speech %}
+                <div class="subContainerItem badge partOfSpeech">
+                    {{ pos }}
+                </div>
+                {% endfor %}
+                {% for field in entry.definitions[0].field %}
+                <div class="subContainerItem badge field">
+                    {{ field }}
+                </div>
+                {% endfor %}
+                {% for dialect in entry.definitions[0].dialect %}
+                <div class="subContainerItem badge dialect">
+                    {{ dialect }}
+                </div>
+                {% endfor %}
+            </div>
         </div>
         {% endif %}
-        {% endfor %}
     </div>
-    {% endif %}
 
-    <!-- Definitions -->
-    <div class="definitions">
-        <span class="containerHeader">
-            {% if entry.definitions | count == 1 %}
-            Definition
-            {% else %}
-            Definitions
-            {% endif %}
-        </span>
-
-        {% for definition_group in entry.definitions %}
-        {% if definition_group.part_of_speech != [] or definition_group.field != [] or definition_group.dialect != [] %}
-        {% for pos in definition_group.part_of_speech %}
-        <div class="subContainerItem partOfSpeech">
-            {{ pos }}
+    <!-- Alternative Forms -->
+    <div class="alternativeFormsContainer">
+        <!-- Alternative Kanji -->
+        {% if entry.kanji | count > 1 %}
+        <div class="kanjiContainer">
+            <span class="containerHeader">Alternative Kanji</span>
+            {% for kanji in entry.kanji[1:] %}
+            <div class="containerItem">
+                <div class="kanjiReading">{{ kanji.kanji }}</div>
+                {% for info in kanji.extra_info %}
+                <div class="subContainerItem info">
+                    <div class="subArrow">↳</div>
+                    <div class="kanjiInfo info">{{ info }}</div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endfor %}
         </div>
-        {% endfor %}
-        {% for field in definition_group.field %}
-        <div class="subContainerItem field">
-            {{ field }}
-        </div>
-        {% endfor %}
-        {% for dialect in definition_group.dialect %}
-        <div class="subContainerItem dialect">
-            {{ dialect }}
-        </div>
-        {% endfor %}
         {% endif %}
 
-        <div class="containerItem">
-            {% if loop.length > 1 %}
-            <div class="subContainerItem definitionIndex">
-                {{ loop.index }}
+        <!-- Alternative Readings -->
+        {% if entry.readings | count > 1 %}
+        <div class="readingsContainer">
+            <span class="containerHeader">Alternative Readings</span>
+            {% for reading in entry.readings %}
+            {% if reading.reading != entry.title %}
+            <div class="containerItem">
+                {% for related in reading.relates_to %}
+                <div class="relatesTo">（{{ related }}）</div>
+                {% endfor %}
+                <div class="reading">{{ reading.reading }}</div>
+                {% if not reading.is_true_reading %}
+                <div class="untrueReading">Reference Only</div>
+                {% endif %}
             </div>
             {% endif %}
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+
+
+    <!-- Definitions -->
+    {% for definition_group in entry.definitions %}
+    {% if loop.first %}
+    <div class="definitions">
+        {% endif %}
+
+        {% if loop.first %}
+        <div class="containerHeader">
+            Definition
+        </div>
+        {% elif not loop.first and definition_group.part_of_speech != [] or definition_group.field != [] or definition_group.dialect != [] %}
+        <div class="titleContainer">
+            <h1 class="containerItem title">
+                {{ entry.title }}
+            </h1>
+            {% for reading in definition_group.related_readings %}
+            <h1 class="containerItem reading">
+                「{{ reading }}」
+            </h1>
+            {% endfor %}
+            <!-- First Definition Classifier -->
+            {% if entry.definitions[0].part_of_speech != [] or entry.definitions[0].field != [] or entry.definitions[0].dialect != [] %}
+            <div class="verticalFlex badges">
+                <div class="containerItem badges">
+                    {% for pos in entry.definitions[0].part_of_speech %}
+                    <div class="subContainerItem badge partOfSpeech">
+                        {{ pos }}
+                    </div>
+                    {% endfor %}
+                    {% for field in entry.definitions[0].field %}
+                    <div class="subContainerItem badge field">
+                        {{ field }}
+                    </div>
+                    {% endfor %}
+                    {% for dialect in entry.definitions[0].dialect %}
+                    <div class="subContainerItem badge dialect">
+                        {{ dialect }}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <div class="containerItem">
+            <div class="subContainerItem definitionIndex">{{ loop.index }}</div>
             <div class="subContainerItem definition">
                 {{ definition_group.definition | join(", ") }}
             </div>
+
             {% for info in definition_group.sense_info %}
-            <div class="subContainerItem senseInfo">
-                ({{ info }})
+            <div class="subContainerItem info">
+                <div class="subArrow">↳</div>
+                <div class="senseInfo info">{{ info }}</div>
             </div>
             {% endfor %}
-        </div>
-        {% endfor %}
-    </div>
 
+        </div>
+        {% if loop.last %}
+    </div>
+    {% endif %}
+    {% endfor %}
 </body>
