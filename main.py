@@ -12,7 +12,9 @@ reverse_words = {}
 
 print("Parsing input dictionary...")
 
-for child in input_root.findall("entry"):
+entry_choices = input_root.findall("entry")
+
+for child in entry_choices:
     entry_id = child.findall("ent_seq")[0].text
     if len(child.findall("k_ele")) != 0:
         entry_title = child.findall("k_ele")[0].findall("keb")[0].text

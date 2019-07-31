@@ -34,17 +34,18 @@
     </div>
 
     <!-- Alternative Forms -->
+    {% if entry.kanji | count > 1 or entry.readings | count > 1 %}
     <div class="alternativeFormsContainer">
         <!-- Alternative Kanji -->
         {% if entry.kanji | count > 1 %}
         <div class="kanjiContainer">
-            <span class="containerHeader">Alternative Kanji</span>
+            <span class="containerHeader">Alternative Forms</span>
             {% for kanji in entry.kanji[1:] %}
-            <div class="containerItem">
+            <div class="containerItem alternativeForm">
                 <div class="kanjiReading">{{ kanji.kanji }}</div>
                 {% for info in kanji.extra_info %}
                 <div class="subContainerItem info">
-                    <div class="subArrow">↳</div>
+                    <div class="rightArrow">→</div>
                     <div class="kanjiInfo info">{{ info }}</div>
                 </div>
                 {% endfor %}
@@ -73,6 +74,7 @@
         </div>
         {% endif %}
     </div>
+    {% endif %}
 
 
     <!-- Definitions -->
@@ -81,11 +83,7 @@
     <div class="definitions">
         {% endif %}
 
-        {% if loop.first %}
-        <div class="containerHeader">
-            Definition
-        </div>
-        {% elif not loop.first and definition_group.part_of_speech != [] or definition_group.field != [] or definition_group.dialect != [] %}
+        {% if not loop.first and definition_group.part_of_speech != [] or definition_group.field != [] or definition_group.dialect != [] %}
         <div class="titleContainer">
             <h1 class="containerItem title">
                 {{ entry.title }}
@@ -120,7 +118,7 @@
         </div>
         {% endif %}
 
-        <div class="containerItem">
+        <div class="containerItem definition">
             <div class="subContainerItem definitionIndex">{{ loop.index }}</div>
             <div class="subContainerItem definition">
                 {{ definition_group.definition | join(", ") }}
