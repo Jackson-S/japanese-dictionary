@@ -91,26 +91,27 @@
 
         {% if not loop.first and (definition_group.part_of_speech != [] or definition_group.field != [] or definition_group.dialect != []) %}
         <div class="titleContainer">
-            <h1 class="containerItem title">{{ entry.title }}</h1>
+            {% if definition_group.related_readings != [] %}
             {% for reading in definition_group.related_readings %}
-            <h1 class="containerItem reading">「{{ reading }}」</h1>
+            <h1 class="containerItem reading">{{ reading }}</h1>
             {% endfor %}
+            {% else %}
+            <h1 class="containerItem title">{{ entry.title }}</h1>
+            {% endif %}
             <!-- First Definition Classifier -->
-            {% if entry.definitions[0].part_of_speech != [] or entry.definitions[0].field != [] or entry.definitions[0].dialect != [] %}
             <div class="verticalFlex badges">
                 <div class="containerItem badges">
-                    {% for pos in entry.definitions[0].part_of_speech %}
+                    {% for pos in definition_group.part_of_speech %}
                     <div class="subContainerItem badge partOfSpeech">{{ pos }}</div>
                     {% endfor %}
-                    {% for field in entry.definitions[0].field %}
+                    {% for field in definition_group.field %}
                     <div class="subContainerItem badge field">{{ field }}</div>
                     {% endfor %}
-                    {% for dialect in entry.definitions[0].dialect %}
+                    {% for dialect in definition_group.dialect %}
                     <div class="subContainerItem badge dialect">{{ dialect }}</div>
                     {% endfor %}
                 </div>
             </div>
-            {% endif %}
         </div>
         {% endif %}
 
