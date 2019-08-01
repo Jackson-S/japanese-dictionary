@@ -1,21 +1,16 @@
+import re
 import jaconv
+import xml.etree.ElementTree as ET
 
 from jinja2 import Template, Environment, select_autoescape, FileSystemLoader
-import xml.etree.ElementTree as ET
-from htmlmin import Minifier
 
 from kanji import Kanji
 from reading import Reading
 from definition import Definition
+from kanji_vg_parser import KanjiImage
 
-class Entry:    
-    _MINIFIER = Minifier(
-        remove_comments=True,
-        remove_empty_space=True, 
-        remove_all_empty_space=True, 
-        remove_optional_attribute_quotes=False
-    )
-    
+
+class Entry:
     _ENVIRONMENT = Environment(
         loader=FileSystemLoader("./entry_templates"),
         autoescape=select_autoescape(
@@ -26,9 +21,12 @@ class Entry:
 
     _TEMPLATE = _ENVIRONMENT.get_template('standard_entry.html')
 
+    _KANJI_DB = KanjiImage("./kanji")
+
     def __init__(self, entry_id, title):
         self.id = entry_id.strip()
         self.title = title.strip()
+        self.stroke_image = None
         self.indices = []
         self.kanji = []
         self.readings = []
@@ -88,13 +86,23 @@ class Entry:
         # Generate the page text using Jinja2
         page_text = self._TEMPLATE.render(entry=self)
         # Minify the page output (So that compilation doesn't crash later from too much input)
-        minified_page = self._MINIFIER.minify(page_text)
+        minified_page = re.sub(r">[\s]*<", "><", page_text)
         # Go through each element and reimport it (Removes <body> tag from template, saving file size)
-        for element in ET.fromstring(minified_page):
-            page_root.append(element)
+        try:
+            for element in ET.fromstring(minified_page):
+                page_root.append(element)
+        except ET.ParseError as e:
+            print(minified_page)
+            raise e
+    
+    def _add_stroke_order(self):
+        if len(self.title) == 1 and self._KANJI_DB.has_image(self.title):
+            self.stroke_image = self._KANJI_DB.get_image_path(self.title)
+
 
     def compile_entry(self):
         page_root_node = ET.Element("d:entry", { "id": self.id, "d:title": self.title })
+        self._add_stroke_order()
         self._compile_indices(page_root_node)
         self._compile_page(page_root_node)
         return page_root_node

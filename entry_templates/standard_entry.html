@@ -23,54 +23,64 @@
         {% endif %}
     </div>
 
-    <!-- Alternative Forms -->
-    {% if entry.kanji | count > 1 or entry.readings | count > 1 %}
-    <div class="alternativeFormsContainer">
-        <!-- Alternative Kanji -->
-        {% if entry.kanji | count > 1 %}
-        <div class="kanjiContainer">
-            <span class="containerHeader">Alternative Forms</span>
-            {% for kanji in entry.kanji[1:] %}
-            <div class="containerItem alternativeForm">
-                <div class="kanjiReading">{{ kanji.kanji }}</div>
-                {% for info in kanji.extra_info %}
-                <div class="subContainerItem info">
-                    <div class="rightArrow">→</div>
-                    <div class="kanjiInfo info">{{ info }}</div>
+    <div class="subheaderContainer">
+        <!-- Alternative Forms -->
+        {% if entry.kanji | count > 1 or entry.readings | count > 1 %}
+        <div class="alternativeFormsContainer subheaderSubcontainer">
+            <!-- Alternative Kanji -->
+            {% if entry.kanji | count > 1 %}
+            <div class="kanjiContainer">
+                <div class="containerHeader">Alternative Forms</div>
+                {% for kanji in entry.kanji[1:] %}
+                <div class="containerItem alternativeForm">
+                    <div class="kanjiReading">{{ kanji.kanji }}</div>
+                    {% for info in kanji.extra_info %}
+                    <div class="subContainerItem info">
+                        <div class="rightArrow">→</div>
+                        <div class="kanjiInfo info">{{ info }}</div>
+                    </div>
+                    {% endfor %}
+                    {% if kanji.is_common %}
+                    <div class="subContainerItem badge common">Common Kanji</div>
+                    {% endif %}
                 </div>
                 {% endfor %}
-                {% if kanji.is_common %}
-                <div class="subContainerItem badge common">Common Kanji</div>
-                {% endif %}
             </div>
-            {% endfor %}
+            {% endif %}
+
+            <!-- Alternative Readings -->
+            {% if entry.readings | count > 1 %}
+            <div class="readingsContainer subheaderSubcontainer">
+                <span class="containerHeader">Alternative Readings</span>
+                {% for reading in entry.readings %}
+                {% if reading.reading != entry.title %}
+                <div class="containerItem alternativeReading">
+                    <div class="reading">{{ reading.reading }}</div>
+                    {% if reading.is_common %}
+                    <div class="subContainerItem badge common">Common Kana</div>
+                    {% endif %}
+                    {% for related in reading.relates_to %}
+                    <div class="subCountainerItem relatesTo">({{ related }})</div>
+                    {% endfor %}
+                    {% if not reading.is_true_reading %}
+                    <div class="untrueReading badge">Reference Only</div>
+                    {% endif %}
+                </div>
+                {% endif %}
+                {% endfor %}
+            </div>
+            {% endif %}
         </div>
         {% endif %}
 
-        <!-- Alternative Readings -->
-        {% if entry.readings | count > 1 %}
-        <div class="readingsContainer">
-            <span class="containerHeader">Alternative Readings</span>
-            {% for reading in entry.readings %}
-            {% if reading.reading != entry.title %}
-            <div class="containerItem alternativeReading">
-                <div class="reading">{{ reading.reading }}</div>
-                {% if reading.is_common %}
-                <div class="subContainerItem badge common">Common Kana</div>
-                {% endif %}
-                {% for related in reading.relates_to %}
-                <div class="subCountainerItem relatesTo">({{ related }})</div>
-                {% endfor %}
-                {% if not reading.is_true_reading %}
-                <div class="untrueReading badge">Reference Only</div>
-                {% endif %}
-            </div>
-            {% endif %}
-            {% endfor %}
+        <!-- Stroke Order -->
+        {% if entry.stroke_image != None %}
+        <div class="kanjiPathContainer subheaderSubcontainer">
+            <div class="containerHeader">Stroke Order</div>
+            <img src="Images/{{ entry.stroke_image }}" />
         </div>
         {% endif %}
     </div>
-    {% endif %}
 
 
     <!-- Definitions -->
@@ -119,7 +129,8 @@
             {% if reference.reference_id != None %}
             <div class="subContainerItem info">
                 <div class="subArrow">↳</div>
-                <div class="senseInfo info">See also: <a href="x-dictionary:r:{{ reference.reference_id }}">{{ reference.reference_word }}</a></div>
+                <div class="senseInfo info">See also: <a
+                        href="x-dictionary:r:{{ reference.reference_id }}">{{ reference.reference_word }}</a></div>
             </div>
             {% endif %}
             {% endfor %}
