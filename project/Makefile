@@ -12,6 +12,7 @@ DICT_NAME		=	"JMdict (Japanese-Multilingual Dictionary)"
 DICT_SRC_PATH	=	JapaneseDictionary.xml
 CSS_PATH		=	JapaneseDictionary.css
 PLIST_PATH		=	JapaneseDictionary.plist
+IMAGE_PATH		=	"OtherResources/Images"
 
 DICT_BUILD_OPTS		= -v 10.6
 # Suppress adding supplementary key.
@@ -49,3 +50,4 @@ install:
 
 clean:
 	$(RM) -rf $(DICT_DEV_KIT_OBJ_DIR)
+	$(RM) -rf $(IMAGE_PATH)

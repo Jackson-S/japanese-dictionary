@@ -1,4 +1,5 @@
 import itertools
+import os
 
 import xml.etree.ElementTree as ET
 
@@ -33,6 +34,8 @@ for entry in tqdm(all_entries):
 
 print("Moving images")
 image_output_path = path.join("project", "OtherResources", "Images")
+if not path.exists(image_output_path):
+    os.mkdir(image_output_path)
 image_input_path = path.join("kanji")
 for file in listdir(image_output_path):
     if ".svg" in file:
