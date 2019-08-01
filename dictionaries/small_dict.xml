@@ -2414,4 +2414,88 @@ various information fields.
             <gloss>one</gloss>
         </sense>
     </entry>
+    <entry>
+        <ent_seq>2013900</ent_seq>
+        <k_ele>
+            <keb>赤</keb>
+            <ke_pri>spec1</ke_pri>
+        </k_ele>
+        <k_ele>
+            <keb>紅</keb>
+        </k_ele>
+        <k_ele>
+            <keb>朱</keb>
+        </k_ele>
+        <k_ele>
+            <keb>緋</keb>
+            <ke_inf>&oK;</ke_inf>
+        </k_ele>
+        <r_ele>
+            <reb>あか</reb>
+            <re_pri>spec1</re_pri>
+        </r_ele>
+        <sense>
+            <pos>&n;</pos>
+            <gloss>red</gloss>
+            <gloss>crimson</gloss>
+            <gloss>scarlet</gloss>
+        </sense>
+        <sense>
+            <gloss>red-containing colour (e.g. brown, pink, orange)</gloss>
+        </sense>
+        <sense>
+            <misc>&col;</misc>
+            <s_inf>often written as アカ</s_inf>
+            <gloss>Red (i.e. communist)</gloss>
+        </sense>
+        <sense>
+            <xref>赤信号・1</xref>
+            <misc>&abbr;</misc>
+            <gloss>red light (traffic)</gloss>
+        </sense>
+        <sense>
+            <xref>赤字・1</xref>
+            <xref>赤字・2</xref>
+            <misc>&abbr;</misc>
+            <gloss>red ink (i.e. in finance or proof-reading)</gloss>
+            <gloss>(in) the red</gloss>
+        </sense>
+        <sense>
+            <pos>&adj-no;</pos>
+            <xref>赤の他人</xref>
+            <gloss>complete</gloss>
+            <gloss>total</gloss>
+            <gloss>perfect</gloss>
+            <gloss>obvious</gloss>
+        </sense>
+        <sense>
+            <stagk>赤</stagk>
+            <pos>&n;</pos>
+            <xref>銅・あかがね・1</xref>
+            <misc>&abbr;</misc>
+            <gloss>copper</gloss>
+        </sense>
+    </entry>
+    <entry>
+        <ent_seq>2013910</ent_seq>
+        <k_ele>
+            <keb>に渡って</keb>
+            <ke_pri>spec1</ke_pri>
+        </k_ele>
+        <k_ele>
+            <keb>に亘って</keb>
+        </k_ele>
+        <r_ele>
+            <reb>にわたって</reb>
+            <re_pri>spec1</re_pri>
+        </r_ele>
+        <sense>
+            <pos>&exp;</pos>
+            <xref>渡る・2</xref>
+            <misc>&uk;</misc>
+            <gloss>throughout</gloss>
+            <gloss>over a period of ...</gloss>
+            <gloss>over a span of ...</gloss>
+        </sense>
+    </entry>
 </JMdict>
