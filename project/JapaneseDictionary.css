@@ -17,6 +17,7 @@
   display: grid;
   grid-template-columns: 20px auto;
   grid-gap: 5px;
+  margin-bottom: 10px;
 }
 
 .subContainerItem.definition {
@@ -39,7 +40,7 @@
 }
 
 .badge {
-  background: rgb(240, 240, 240);
+  background: rgb(220, 220, 220);
   border: 1px solid rgb(220, 220, 220);
   width: min-content;
   height: 1.2em;
@@ -49,6 +50,10 @@
   border-radius: 5px;
   margin: 0 2px;
   margin-bottom: 1px;
+}
+
+.badge.common {
+  margin-left: 10px;
 }
 
 .containerItem.badges {
@@ -96,8 +101,24 @@
   flex-direction: column-reverse;
 }
 
-.containerItem.alternativeForm {
+.containerItem.alternativeForm, .containerItem.alternativeReading {
   display: flex;
+}
+
+.subContainerItem.crossReference {
+  column: 2;
+  row: 1;
+  width: 100px;
+}
+
+.subContainerItem.definitionInfo {
+  display: flex;
+  grid-column: 2;
+}
+
+.subContainerItem.crossReference {
+  white-space: nowrap;
+  font-size: smaller;
 }
 
 .rightArrow {
@@ -110,5 +131,21 @@
 {
 	body {
 		color: white;
-	}
+  }
+  
+  .badge {
+    background: rgb(100, 100, 100);
+  }
+  
+  .badge.common {
+    background: rgb(100, 100, 100);
+  }
+
+  .alternativeFormsContainer {
+    background: rgb(60, 60, 60);
+  }
+
+  .subContainerItem.info .subArrow {
+    color: rgb(100, 100, 100);
+  }
 }

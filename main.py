@@ -7,12 +7,13 @@ from entry import Entry
 
 print("Parsing input dictionary...")
 
-input_tree = ET.parse("dictionaries/JMdict_e.xml")
-# input_tree = ET.parse("dictionaries/small_dict.xml")
+# input_tree = ET.parse("dictionaries/JMdict_e.xml")
+input_tree = ET.parse("dictionaries/small_dict.xml")
 input_root = input_tree.getroot()
 
 output_dictionary = Dictionary()
 entries = []
+reference_dict = {}
 reverse_words = {}
 
 entry_choices = input_root.findall("entry")
@@ -31,22 +32,21 @@ for child in entry_choices:
     for kanji_element in child.findall("k_ele"):
         kanji = kanji_element.findall("keb")[0].text
         kanji_information = [x.text for x in kanji_element.findall("ke_inf")]
+        kanji_priority = [x.text for x in reading_element.findall("ke_pri")]
         entry.add_index(kanji)
-        entry.add_kanji(kanji, kanji_information)
+        entry.add_kanji(kanji, kanji_information, kanji_priority)
 
     for reading_element in child.findall("r_ele"):
         reading = reading_element.findall("reb")[0].text
-        reading_information = [
-            x.text for x in reading_element.findall("re_inf")]
+        reading_information = [x.text for x in reading_element.findall("re_inf")]
         is_true_reading = len(reading_element.findall("re_nokanji")) == 0
-        reading_relates_to = [
-            x.text for x in reading_element.findall("re_restr")]
+        reading_relates_to = [x.text for x in reading_element.findall("re_restr")]
+        reading_priority = [x.text for x in reading_element.findall("re_pri")]
 
         entry.add_index(reading)
-        entry.add_reading(reading, reading_information,
-                          is_true_reading, reading_relates_to)
+        entry.add_reading(reading, reading_information, is_true_reading, reading_relates_to, reading_priority)
 
-    for sense_element in child.findall("sense"):
+    for index, sense_element in enumerate(child.findall("sense")):
         related_readings = []
         for reading_element in sense_element.findall("stagk"):
             related_readings.append(reading_element.text)
@@ -62,6 +62,11 @@ for child in entry_choices:
         dialects = [x.text for x in sense_element.findall("dial")]
         definitions = [x.text for x in sense_element.findall("gloss")]
 
+        reference_number = "・{}".format(index + 1)
+        if index == 0:
+            reference_dict[entry.title] = entry.id
+        reference_dict["{}{}".format(entry.title, reference_number)] = entry.id
+
         # Create a list of english translations
         for gloss in sense_element.findall("gloss"):
             stripped_gloss = gloss.text
@@ -75,8 +80,7 @@ for child in entry_choices:
                             [entry, gloss.text])
                 else:
                     reverse_words[stripped_gloss] = [[entry, gloss.text]]
-        entry.add_definition(definitions, cross_references, part_of_speech, related_readings,
-                             antonyms, field, misc_info, sense_info, language_source, dialects)
+        entry.add_definition(definitions, cross_references, part_of_speech, related_readings, antonyms, field, misc_info, sense_info, language_source, dialects)
 
     # Add the entry to the output array
     entries.append(entry)
@@ -90,9 +94,34 @@ for index, word in enumerate(reverse_words):
         entry.add_index(word[2:])
     for jp_entry, full_word in reverse_words[word]:
         translation = [jp_entry.title]
-        sense_info = [x for x in [full_word, ] if x != word]
-        entry.add_definition(translation, translation, sense_info=sense_info)
+        sense_info = []
+        if full_word != word:
+            clarification = full_word
+            if clarification.startswith(word):
+                clarification = clarification[len(word):]
+                clarification = clarification.strip("()")
+            
+            # Capitalise the first letter in the sentence 
+            # (Can't use capitalize() because it doesn't do proper nouns)
+            clarification = "{}{}".format(clarification[0].upper(), clarification[1:])
+            sense_info.append(clarification)
+            
+        entry.add_definition(translation, sense_info=sense_info)
     entries.append(entry)
+
+error_entries = 0
+
+print("Generating cross reference links")
+for entry in entries:
+    for definition in entry.definitions:
+        for reference in definition.cross_references:
+            if reference.reference_word in reference_dict:
+                reference.set_reference_id(reference_dict[reference.reference_word])
+            else:
+                error_entries += 1
+
+print("Could not find {} reference(s)".format(error_entries))
+            
 
 print("Generating output dictionary")
 for entry in tqdm(entries):

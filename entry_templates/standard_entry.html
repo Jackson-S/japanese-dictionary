@@ -39,6 +39,9 @@
                     <div class="kanjiInfo info">{{ info }}</div>
                 </div>
                 {% endfor %}
+                {% if kanji.is_common %}
+                <div class="subContainerItem badge common">Common Kanji</div>
+                {% endif %}
             </div>
             {% endfor %}
         </div>
@@ -50,13 +53,16 @@
             <span class="containerHeader">Alternative Readings</span>
             {% for reading in entry.readings %}
             {% if reading.reading != entry.title %}
-            <div class="containerItem">
-                {% for related in reading.relates_to %}
-                <div class="relatesTo">（{{ related }}）</div>
-                {% endfor %}
+            <div class="containerItem alternativeReading">
                 <div class="reading">{{ reading.reading }}</div>
+                {% if reading.is_common %}
+                <div class="subContainerItem badge common">Common Kana</div>
+                {% endif %}
+                {% for related in reading.relates_to %}
+                <div class="subCountainerItem relatesTo">({{ related }})</div>
+                {% endfor %}
                 {% if not reading.is_true_reading %}
-                <div class="untrueReading">Reference Only</div>
+                <div class="untrueReading badge">Reference Only</div>
                 {% endif %}
             </div>
             {% endif %}
@@ -73,7 +79,7 @@
     <div class="definitions">
         {% endif %}
 
-        {% if not loop.first and definition_group.part_of_speech != [] or definition_group.field != [] or definition_group.dialect != [] %}
+        {% if not loop.first and (definition_group.part_of_speech != [] or definition_group.field != [] or definition_group.dialect != []) %}
         <div class="titleContainer">
             <h1 class="containerItem title">{{ entry.title }}</h1>
             {% for reading in definition_group.related_readings %}
@@ -102,12 +108,34 @@
             <div class="subContainerItem definitionIndex">{{ loop.index }}</div>
             <div class="subContainerItem definition">{{ definition_group.definition | join(", ") }}</div>
 
+            {% if definition_group.sense_info != [] or definition_group.reference != [] or definition_group.antonym != [] or definition_group.misc_info != [] %}
             {% for info in definition_group.sense_info %}
             <div class="subContainerItem info">
                 <div class="subArrow">↳</div>
                 <div class="senseInfo info">{{ info }}</div>
             </div>
             {% endfor %}
+            {% for reference in definition_group.cross_references %}
+            {% if reference.reference_id != None %}
+            <div class="subContainerItem info">
+                <div class="subArrow">↳</div>
+                <div class="senseInfo info">See also: <a href="x-dictionary:r:{{ reference.reference_id }}">{{ reference.reference_word }}</a></div>
+            </div>
+            {% endif %}
+            {% endfor %}
+            {% for info in definition_group.antonym %}
+            <div class="subContainerItem info">
+                <div class="subArrow">↳</div>
+                <div class="senseInfo info">Antonym: {{ info }}</div>
+            </div>
+            {% endfor %}
+            {% for info in definition_group.misc_info %}
+            <div class="subContainerItem info">
+                <div class="subArrow">↳</div>
+                <div class="senseInfo info">{{ info }}</div>
+            </div>
+            {% endfor %}
+            {% endif %}
 
         </div>
         {% if loop.last %}
