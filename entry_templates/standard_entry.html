@@ -1,32 +1,22 @@
 <body>
     <!-- Title -->
     <div class="titleContainer">
-        <h1 class="containerItem title">
-            {{ entry.title }}
-        </h1>
+        <h1 class="containerItem title">{{ entry.title }}</h1>
         {% if entry.readings | count == 1 and entry.readings[0].reading != entry.title %}
-        <h1 class="containerItem reading">
-            「{{ entry.readings[0].reading }}」
-        </h1>
+        <h1 class="containerItem reading">「{{ entry.readings[0].reading }}」</h1>
         {% endif %}
         <!-- First Definition Classifier -->
         {% if entry.definitions[0].part_of_speech != [] or entry.definitions[0].field != [] or entry.definitions[0].dialect != [] %}
         <div class="verticalFlex badges">
             <div class="containerItem badges">
                 {% for pos in entry.definitions[0].part_of_speech %}
-                <div class="subContainerItem badge partOfSpeech">
-                    {{ pos }}
-                </div>
+                <div class="subContainerItem badge partOfSpeech">{{ pos }}</div>
                 {% endfor %}
                 {% for field in entry.definitions[0].field %}
-                <div class="subContainerItem badge field">
-                    {{ field }}
-                </div>
+                <div class="subContainerItem badge field">{{ field }}</div>
                 {% endfor %}
                 {% for dialect in entry.definitions[0].dialect %}
-                <div class="subContainerItem badge dialect">
-                    {{ dialect }}
-                </div>
+                <div class="subContainerItem badge dialect">{{ dialect }}</div>
                 {% endfor %}
             </div>
         </div>
@@ -85,32 +75,22 @@
 
         {% if not loop.first and definition_group.part_of_speech != [] or definition_group.field != [] or definition_group.dialect != [] %}
         <div class="titleContainer">
-            <h1 class="containerItem title">
-                {{ entry.title }}
-            </h1>
+            <h1 class="containerItem title">{{ entry.title }}</h1>
             {% for reading in definition_group.related_readings %}
-            <h1 class="containerItem reading">
-                「{{ reading }}」
-            </h1>
+            <h1 class="containerItem reading">「{{ reading }}」</h1>
             {% endfor %}
             <!-- First Definition Classifier -->
             {% if entry.definitions[0].part_of_speech != [] or entry.definitions[0].field != [] or entry.definitions[0].dialect != [] %}
             <div class="verticalFlex badges">
                 <div class="containerItem badges">
                     {% for pos in entry.definitions[0].part_of_speech %}
-                    <div class="subContainerItem badge partOfSpeech">
-                        {{ pos }}
-                    </div>
+                    <div class="subContainerItem badge partOfSpeech">{{ pos }}</div>
                     {% endfor %}
                     {% for field in entry.definitions[0].field %}
-                    <div class="subContainerItem badge field">
-                        {{ field }}
-                    </div>
+                    <div class="subContainerItem badge field">{{ field }}</div>
                     {% endfor %}
                     {% for dialect in entry.definitions[0].dialect %}
-                    <div class="subContainerItem badge dialect">
-                        {{ dialect }}
-                    </div>
+                    <div class="subContainerItem badge dialect">{{ dialect }}</div>
                     {% endfor %}
                 </div>
             </div>
@@ -120,9 +100,7 @@
 
         <div class="containerItem definition">
             <div class="subContainerItem definitionIndex">{{ loop.index }}</div>
-            <div class="subContainerItem definition">
-                {{ definition_group.definition | join(", ") }}
-            </div>
+            <div class="subContainerItem definition">{{ definition_group.definition | join(", ") }}</div>
 
             {% for info in definition_group.sense_info %}
             <div class="subContainerItem info">

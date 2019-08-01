@@ -27,8 +27,8 @@ class Entry:
     _TEMPLATE = _ENVIRONMENT.get_template('standard_entry.html')
 
     def __init__(self, entry_id, title):
-        self.id = entry_id
-        self.title = title
+        self.id = entry_id.strip()
+        self.title = title.strip()
         self.indices = []
         self.kanji = []
         self.readings = []
@@ -53,13 +53,17 @@ class Entry:
         permutations = self._get_permutations(value)
         self.indices.extend(permutations)
     
-    def add_kanji(self, reading, extra_info):
-        kanji = Kanji(reading, extra_info)
-        self.kanji.append(kanji)
+    def add_kanji(self, kanji, extra_info):
+        kanji_stripped = kanji.strip()
+        info_stripped = [x.strip() for x in extra_info]
+        kanji_entry = Kanji(kanji_stripped, info_stripped)
+        self.kanji.append(kanji_entry)
 
     def add_reading(self, reading, extra_info, is_true_reading=True, relates_to=[]):
-        reading = Reading(reading, extra_info, is_true_reading, relates_to)
-        self.readings.append(reading)
+        reading_stripped = reading.strip()
+        info_stripped = [x.strip() for x in extra_info]
+        reading_entry = Reading(reading_stripped, info_stripped, is_true_reading, relates_to)
+        self.readings.append(reading_entry)
 
     def add_definition(self, definition=[], cross_reference=[], part_of_speech=[], related_readings=[], antonym=[], field=[], misc_info=[], sense_info=[], language_source=[], dialect=[]):
         definition = Definition(definition, cross_reference, part_of_speech, related_readings, antonym, field, misc_info, sense_info, language_source, dialect)
