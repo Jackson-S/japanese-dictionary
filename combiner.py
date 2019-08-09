@@ -1,0 +1,234 @@
+import argparse
+
+import xml.etree.ElementTree as ElementTree
+
+from typing import Union, List, Optional, Set, Dict
+
+from jinja2 import Template, Environment, FileSystemLoader, select_autoescape, exceptions
+
+from itertools import chain
+
+
+class Sentence:
+    def __init__(self, tag: ElementTree.Element):
+        self.english = tag.attrib["en"]
+        self.japanese = tag.attrib["jp"]
+        self.keys = set([x.attrib["dictionary_form"] for x in tag.findall("index")])
+        self.sense_indices = {x.attrib["dictionary_form"]: x.attrib["sense_index"] for x in tag.findall("index") if "sense_index" in x.attrib}
+
+class Entry:
+    def __init__(self, page_title: str, language: str, entry_type: str):
+        self.page_title: str = page_title
+        self.page_id: str = "{}_{}_{}".format(language, entry_type, page_title)
+
+class Reading:
+    def __init__(self, reading: str, info: List[str]):
+        self.text: str = reading
+        self.info: List[str] = info
+
+class Definition:
+    def __init__(self, pos: List[str], translations: List[str]):
+        self.pos: List[str] = pos
+        self.translations: List[str] = translations
+
+class DictionaryEntry(Entry):
+    def __init__(self, dictionary_entry: ElementTree.Element, sentences: Dict[str, Sentence], kanji_set: Set[str]):
+        title = dictionary_entry.attrib["title"]
+        super().__init__(title, "jp", "dictionary")
+
+        # Takes a dictionary entry and checks for containing kanji
+        self.containing_kanji: List[str] = self.get_containing_kanji(kanji_set)
+
+        self.sentences: List[Sentence] = sentences.get(title, [])
+        self.sentences = sorted(self.sentences, key=lambda x: int(x.sense_indices.get(self.page_title, 1000)))
+
+        self.readings: List[Reading] = []
+        for reading in dictionary_entry.find("readings").findall("reading"):
+            name = reading.attrib["text"]
+            info_list = []
+            for info in reading.findall("info"):
+                info_list.append(info.text)
+            self.readings.append(Reading(name, info_list))
+        
+        self.kanji: List[Reading] = []
+        for kanji in dictionary_entry.find("kanji").findall("form"):
+            name = kanji.attrib["text"]
+            info_list = []
+            for info in kanji.findall("info"):
+                info_list.append(info.text)
+            self.kanji.append(Reading(name, info_list))
+        
+        self.definitions: List[Definition] = []
+        for definition in dictionary_entry.find("definitions").findall("definition"):
+            pos = [x.text for x in definition.findall("pos")]
+            translations = [x.text for x in definition.findall("translation")]
+            if len(translations) > 0:
+                self.definitions.append(Definition(pos, translations))
+ 
+
+    def get_containing_kanji(self, kanji_set: Set[str]) -> List[str]:
+        result = []
+        for char in self.page_title:
+            if char in kanji_set:
+                result.append(char)
+        return result
+    
+    def is_worth_adding(self) -> bool:
+        return len(self.definitions) != 0
+
+
+class KanjiEntry(Entry):
+    def __init__(self, kanji_entry: ElementTree.Element):
+        title = kanji_entry.attrib["title"]
+        super().__init__(title, "jp", "kanji")
+
+        self.image: str = kanji_entry.attrib["image"]
+
+        readings = kanji_entry.find("readings")
+
+        # List of Reading objects containing the on-yomi (sound readings)
+        self.on_yomi: List[str] = [x.text for x in readings.findall("reading") if x.attrib["type"] == "on_yomi"]
+        # List of Reading objects containing the kun-yomi (meaning readings)
+        self.kun_yomi: List[str] = [x.text for x in readings.findall("reading") if x.attrib["type"] == "kun_yomi"]
+        # List of Reading objects containing the nanori (name readings)
+        self.nanori: List[str] = [x.text for x in readings.findall("reading") if x.attrib["type"] == "nanori"]
+
+        # List of radicals as an index (according to Kangxi radicals system)
+        self.radicals: List[int] = [x.text for x in kanji_entry.findall("radical")]
+
+        senses = kanji_entry.findall("sense")
+
+        # List of Definition objects. Each one can contain a series of translations, and has an index
+        self.definitions: List[List[Definition]] = [[y.text for y in x.findall("translation")] for x in kanji_entry.findall("sense")]
+
+
+class DictionaryOutput:
+    def __init__(self, pages):
+        self.full_entries = set([page.page_title for page in pages.values() if type(page) == DictionaryEntry])
+        self.root: ElementTree.Element = ElementTree.Element(
+            "d:dictionary", 
+            {
+                "xmlns": "http://www.w3.org/1999/xhtml", 
+                "xmlns:d": "http://www.apple.com/DTDs/DictionaryService-1.0.rng"
+            }
+        )
+        self.environment = Environment(
+            loader=FileSystemLoader("assets"),
+            autoescape=select_autoescape(
+                enabled_extensions=('html', 'xml'), 
+                default_for_string=True
+            )
+        )
+        self.templates = {
+            KanjiEntry: self.environment.get_template("kanji_page.html"),
+            DictionaryEntry: self.environment.get_template("definition_page.html")
+        }
+
+        for page in pages.values():
+            self.generate_entry(page)
+    
+    def has_full_entry(self, kanji_page: Entry):
+        return kanji_page.page_title in self.full_entries
+    
+    def _generate_full_entry(self, page: Entry):
+        # Create the primary node
+        xml_page = ElementTree.SubElement(
+            self.root, "d:entry", { "id": page.page_id, "d:title": page.page_title }
+        )
+        
+        # Create an index for the initial character
+        ElementTree.SubElement(xml_page, "d:index", { "d:title": page.page_title, "d:value": page.page_title })
+        
+        readings = []
+
+        if type(page) == KanjiEntry:
+            readings = [x for x in chain(page.on_yomi, page.kun_yomi)]
+        elif type(page) == DictionaryEntry:
+            readings = [x.text for x in page.readings]
+        
+        for reading in readings:
+            ElementTree.SubElement(xml_page, "d:index", {"d:yomi": reading, "d:title": page.page_title, "d:value": reading})
+        
+        html_page = self.generate_page(page)
+
+        for element in ElementTree.fromstring(html_page):
+            xml_page.append(element)
+    
+    def _generate_kanji_entry(self, page: Entry):
+        # Create the primary node
+        xml_page = ElementTree.SubElement(
+            self.root, "d:entry", { "id": page.page_id, "d:title":  "{} (Kanji Form)".format(page.page_title) }
+        )
+
+        html_page = self.generate_page(page)
+
+        for element in ElementTree.fromstring(html_page):
+            xml_page.append(element)
+
+    def generate_entry(self, page: Entry):
+        # If this is a kanji entry, and the kanji doesn't appear in the full dictionary 
+        # then add an index and make it searchable
+        if (type(page) == KanjiEntry and not self.has_full_entry(page)) or type(page) == DictionaryEntry:
+            self._generate_full_entry(page)
+        else:
+            self._generate_kanji_entry(page)
+
+    def generate_page(self, page):
+        return self.templates[type(page)].render(entry=page)
+        
+        
+
+def main():
+    pages = dict()
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("dictionary", type=str)
+    parser.add_argument("kanji", type=str)
+    parser.add_argument("sentences", type=str)
+    parser.add_argument("-o", type=str)
+    args = parser.parse_args()
+
+    tree = ElementTree.parse(args.kanji)
+    root = tree.getroot()
+
+    # Create all the pages for the kanji
+    kanji_list = []
+    for entry in root:
+        new_entry: KanjiEntry = KanjiEntry(entry)
+        pages[new_entry.page_id] = new_entry
+        kanji_list.append(new_entry.page_title)
+    kanji_set = set(kanji_list)
+    del kanji_list
+
+    tree = ElementTree.parse(args.sentences)
+    root = tree.getroot()
+
+    sentence_list: List[Sentence] = []
+    for entry in root:
+        sentence_list.append(Sentence(entry))
+    
+    sentence_index_list = {}
+    for sentence in sentence_list:
+        for key in sentence.keys:
+            if key in sentence_index_list:
+                sentence_index_list[key].append(sentence)
+            else:
+                sentence_index_list[key] = [sentence]
+    del sentence_list
+
+    tree = ElementTree.parse(args.dictionary)
+    root = tree.getroot()
+
+    for entry in root:
+        new_entry: DictionaryEntry = DictionaryEntry(entry, sentence_index_list, kanji_set)
+        if new_entry.is_worth_adding():
+            pages[new_entry.page_title] = new_entry
+    
+    dictionary = DictionaryOutput(pages)
+    tree = ElementTree.ElementTree(dictionary.root)
+    tree.write(args.o, "UTF-8", True)
+    
+    
+
+if __name__ == "__main__":
+    main()
