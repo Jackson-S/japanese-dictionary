@@ -1,0 +1,73 @@
+<body>
+    <section id="header">
+        <h1 id="page_title">{{ entry.page_title }}</h1>
+    </section>
+
+    <section id="sub_header">
+
+        {% if entry.on_yomi | count > 0 and entry.kun_yomi | count > 0 %}
+        <section id="readings">
+
+            {% if entry.on_yomi | count > 0 %}
+            <section id="onyomi">
+                <h3 class="section_heading" apple_mouseover_disable="1">On-Yomi</h3>
+                {% for reading in entry.on_yomi %}
+                <div class="reading">
+                    <p>{{ reading }}</p>
+                </div>
+                {% endfor %}
+            </section>
+            {% endif %}
+            
+            {% if entry.kun_yomi | count > 0 %}
+            <section id="kunyomi">
+                <h3 class="section_heading" apple_mouseover_disable="1">Kun-Yomi</h3>
+                {% for reading in entry.kun_yomi %}
+                <div class="reading">
+                    <p>{{ reading }}</p>
+                </div>
+                {% endfor %}
+            </section>
+            {% endif %}
+
+        </section>
+        {% endif %}
+
+        {% if entry.nanor | count > 0 %}
+        <details id="nanori">
+            <summary class="section_heading" apple_mouseover_disable="1">Nanori</summary>
+            {% for reading in entry.nanori %}
+            {% if loop.last %}
+            <p>{{ reading }}</p>
+            {% else %}
+            <p>{{ reading }}、</p>
+            {% endif %}
+            {% endfor %}
+        </details>
+        {% endif %}
+
+
+        <details id="stroke_order">
+            <summary class="section_heading" apple_mouseover_disable="1">Stroke Order</summary>
+            <img src="Images/{{ entry.image }}" />
+        </details>
+    </section>
+
+    <section id="definitions">
+        <h3 class="section_heading" apple_mouseover_disable="1">Definitions</h3>
+        {% for definition in entry.definitions %}
+        <article>
+            <p class="number" apple_mouseover_disable="1">{{ loop.index }}</p>
+            <div class="translation_line">
+                {% for translation in definition %}
+                {% if loop.last %}
+                <p class="translation">{{ translation }}</p>
+                {% else %}
+                <p class="translation">{{ translation }},</p>
+                {% endif %}
+                {% endfor %}
+            </div>
+        </article>
+        {% endfor %}
+    </section>
+</body>

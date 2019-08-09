@@ -5,13 +5,13 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.jackson-s.jmdict</string>
+	<string>com.jackson-s.japanesedictionary</string>
 	<key>CFBundleName</key>
 	<string>Japanese - English</string>
 	<key>CFBundleShortVersionString</key>
 	<string>1.0</string>
 	<key>DCSDictionaryManufacturerName</key>
-	<string>JMDict</string>
+	<string>Japanese Dictionary</string>
 	<key>DCSDictionaryPrefsHTML</key>
 	<string>JapaneseDictionary_prefs.html</string>
 	<key>DCSDictionaryUseSystemAppearance</key>

@@ -1,0 +1,130 @@
+@charset "UTF-8";
+@namespace d url(http://www.apple.com/DTDs/DictionaryService-1.0.rng);
+
+d|entry {
+}
+
+p {
+  margin: 0px 0;
+  width: min-content;
+  white-space: nowrap;
+}
+
+summary {
+  cursor: pointer !important;
+}
+
+#header, #sub_header, #definitions {
+  max-width: 600px;
+}
+
+#sub_header {
+  display: grid;
+  grid-gap: 10px;
+}
+
+#sub_header > details, #sub_header > section {
+  background-color: rgba(230,230,230,100);
+  padding: 10px;
+  border-radius: 5px;
+}
+
+#sub_header > #readings {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.section_heading {
+  cursor: default;
+  font-size: small;
+  font-weight: normal;
+  margin: 2px 0;
+}
+
+#sub_header > #nanori > p {
+  display: inline-block;
+}
+
+#sub_header > #readings .reading {
+  display: flex;
+}
+
+#sub_header > #readings .reading > p {
+  margin-right: 10px;
+}
+
+#sub_header > #stroke_order img {
+  width: 100%;
+}
+
+#definitions {
+  border: 1px solid lightgrey;
+  margin: 10px 0;
+  border-radius: 5px;
+}
+
+#definitions h3 {
+  padding: 10px 0 0 10px;
+  margin: 0;
+  font-size: medium;
+  font-weight: normal;
+}
+
+#definitions > article {
+  display: grid;
+  grid-template-columns: min-content 1fr min-content;
+  grid-gap: 10px;
+  margin: 10px;
+  padding-bottom: 5px;
+  border-bottom: dotted 1.5px lightgray;
+}
+
+#definitions > article:last-of-type {
+    border-bottom: none;
+}
+
+#definitions .translation_line > p {
+    display: inline-block;
+}
+
+#definitions .number {
+  grid-column: 1;
+  font-size: smaller;
+  align-self: center;
+  color: grey;
+}
+
+#definitions .badges {
+  display: flex;
+}
+
+#containing_kanji a {
+  color: black;
+  font-size: larger;
+  margin-right: 5px;
+}
+
+#sentences {
+  max-width: 600px;
+}
+
+.sentence {
+  width: 100%;
+  padding: 10px 0;
+}
+
+.sentence > p {
+  white-space: normal;
+  width: 100%;
+}
+
+.badge {
+  display: inline-block;
+  padding: 2px 5px;
+  margin: 0 2px;
+  background: rgba(230,230,230,100);
+  width: min-content;
+  white-space: nowrap;
+  border-radius: 5px;
+  font-size: 80%;
+}
