@@ -8,6 +8,7 @@ from typing import Union, List
 Parses the Kanjidic2.xml file format, and can output a series of dictionary entries as html files
 """
 
+
 class Reading:
     def __init__(self, reading: str, type: str):
         # The reading in hirigana
@@ -22,9 +23,9 @@ class Definition:
         # The index of the definition
         self.index: int = index
 
-        #The list of translations for this index
+        # The list of translations for this index
         self.translations: List[str] = translations
-        
+
 
 class KanjiEntry:
     def __init__(self, kanjidic2_tag: ElementTree.Element):
@@ -65,7 +66,7 @@ class KanjiEntry:
     def add_definition(self, index: int, translations: List[str]) -> None:
         definition = Definition(index, translations)
         self.definitions.append(definition)
-    
+
     def is_worth_outputting(self) -> bool:
         value = 0
         value += len(self.on_yomi)
@@ -74,11 +75,12 @@ class KanjiEntry:
         for definition in self.definitions:
             value += len(definition.translations)
         return value > 0
-    
+
     def _read_tag(self, tag: ElementTree.Element):
         # Check that the tag is of the correct type to be parsed
         if tag.tag != "character":
-            error = "Input tag is of type {} expected 'character'".format(self.tag.tag)
+            error = "Input tag is of type {} expected 'character'".format(
+                self.tag.tag)
             raise ValueError(error)
 
         # Get the page title
@@ -88,14 +90,14 @@ class KanjiEntry:
         # Generate the readings and definitions
         for reading_meaning in tag.findall("reading_meaning"):
             for index, rmgroup in enumerate(reading_meaning.findall("rmgroup")):
-                
+
                 # Add each on and kun reading
                 for reading in rmgroup.findall("reading"):
                     if reading.attrib["r_type"] == "ja_on":
                         self.add_reading(reading.text, "on")
                     elif reading.attrib["r_type"] == "ja_kun":
                         self.add_reading(reading.text, "kun")
-                
+
                 # Add each meaning
                 translations = []
                 for meaning in rmgroup.findall("meaning"):
@@ -103,14 +105,14 @@ class KanjiEntry:
                     if "m_lang" not in meaning.attrib:
                         translations.append(meaning.text)
                 self.add_definition(index + 1, translations)
-            
+
             for nanori in reading_meaning.findall("nanori"):
                 self.add_reading(nanori.text, "nan")
-        
+
         # Add the radical data
         for rad_value in tag.find("radical").findall("rad_value"):
             self.radicals.append(int(rad_value.text))
-        
+
         for codepoint in tag.find("codepoint").findall("cp_value"):
             if codepoint.attrib["cp_type"] == "ucs":
                 self.utf8_codepoint = codepoint.text
@@ -132,7 +134,7 @@ def main():
 
     tree = ElementTree.parse(args.kanjidic2)
     root = tree.getroot()
-    
+
     entries: List[KanjiEntry] = []
 
     for character in root.findall("character"):
@@ -143,38 +145,37 @@ def main():
     for entry in entries:
         if entry.is_worth_outputting():
             kvg_name = "{:05x}.svg".format(int(entry.utf8_codepoint, base=16))
-            
+
             attribs = {
                 "title": entry.page_title,
                 "image": kvg_name
             }
 
             entry_root = ElementTree.Element("entry", attribs)
-            
+
             for radical in entry.radicals:
                 append_tag(entry_root, "radical", str(radical))
-            
+
             readings = ElementTree.SubElement(entry_root, "readings")
 
             for reading in entry.on_yomi:
                 append_tag(readings, "reading", reading, {"type": "on_yomi"})
-            
+
             for reading in entry.kun_yomi:
                 append_tag(readings, "reading", reading, {"type": "kun_yomi"})
-            
+
             for reading in entry.nanori:
                 append_tag(readings, "reading", reading, {"type": "nanori"})
-            
+
             for definition_group in entry.definitions:
                 sense = ElementTree.SubElement(entry_root, "sense")
                 for word in definition_group.translations:
                     append_tag(sense, "translation", word)
-            
+
             root.append(entry_root)
-    
+
     tree = ElementTree.ElementTree(root)
     tree.write("output/kanji.xml", "UTF-8", True)
-
 
 
 if __name__ == "__main__":
