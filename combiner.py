@@ -8,6 +8,15 @@ from jinja2 import Template, Environment, FileSystemLoader, select_autoescape, e
 
 from itertools import chain
 
+verb_badges = ["Ichidan (くれる)", "Godan (〜ある)", "Godan (〜ぶ)", "Godan (〜ぐ)", 
+         "Godan (いく・ゆく)", "Godan (〜く)", "Godan (〜む)", "Godan (〜ぬ)", 
+         "Godan Irregular (〜る)", "Godan (〜る)", "Godan (〜す)", 
+         "Godan (〜つ)", "Godan Irregular (〜う)", "Godan (〜う)", "Verb (くる)", 
+         "Verb Irregular (ぬ)", "Verb Irregular (る→り)", "Verb (する)", 
+         "Ichidan (ずる)"]
+adjective_badges = ["Adjective (よい)", "Adjective (たる)"]
+adverb_badges = ["Adverb (〜と)"]
+noun_badges = ["Noun (Temporal)", "Noun/Participle Taking する"]
 
 class Sentence:
     def __init__(self, tag: ElementTree.Element):
@@ -92,6 +101,10 @@ class EnglishDictionaryEntry(Entry):
         self.translations: List[Translation] = []
     
     def add_translation(self, japanese_word: str, context: List[str], speech_parts: List[str]):
+        # Reduce the complexity of the part of speech indicator (e.g. "Godan (く)" -> "Verb")
+        speech_parts = self.simplify_speech_parts(speech_parts)
+        
+        # If there is already an entry on that page for this kanji with the same part of speech
         if self.get_containing_item(japanese_word, speech_parts):
             existing_entry = self.get_containing_item(japanese_word, speech_parts)
             for word in context:
@@ -109,6 +122,21 @@ class EnglishDictionaryEntry(Entry):
             if translation.japanese_word == japanese_word:
                 return translation
         return None
+
+    def simplify_speech_parts(self, speech_parts: List[str]) -> List[str]:
+        simplified_speech_parts = []
+        for item in speech_parts:
+            if item in verb_badges:
+                simplified_speech_parts.append("Verb")
+            elif item in noun_badges:
+                simplified_speech_parts.append("Noun")
+            elif item in adjective_badges:
+                simplified_speech_parts.append("Adjective")
+            elif item in adverb_badges:
+                simplified_speech_parts.append("Adverb")
+            else:
+                simplified_speech_parts.append(item)
+        return sorted(list(set(simplified_speech_parts)))
 
 
 class KanjiEntry(Entry):
@@ -275,10 +303,10 @@ def main():
                     translation.replace("to ", ""), # Account for words given in infinitive (?) form i.e. 'to get up'
                     translation.replace("to ", "").split("(")[0].strip() # Account for a mix of above
                 ]
-                context = [x for x in definition.translations if x != translation]
 
                 for word in variant_words:
                     if word in english_pages.keys():
+                        context = [x for x in definition.translations if x != word]
                         english_pages[word].add_translation(page.page_title, context, definition.pos)
 
     for key in english_pages:
