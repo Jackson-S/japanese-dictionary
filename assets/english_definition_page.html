@@ -1,0 +1,29 @@
+<body>
+    <section id="header">
+        <h1 id="page_title">{{ entry.page_title }}</h1>
+    </section>
+
+    <section id="english_translations">
+        <h3 class="section_heading" apple_mouseover_disable="1">Translations</h3>
+        {% for translation in entry.translations %}
+        <article>
+            <p class="number" apple_mouseover_disable="1">{{ loop.index }}</p>
+            <p class="japanese_translation">{{ translation.japanese_word }}</p>
+            <div class="translation_line">
+                {% for context in translation.context_words %}
+                {% if loop.last %}
+                <p class="context_word">{{ context }}</p>
+                {% else %}
+                <p class="context_word">{{ context }},</p>
+                {% endif %}
+                {% endfor %}
+            </div>
+            <div class="badges">
+                {% for pos in translation.pos %}
+                <div class="badge">{{ pos }}</div>
+                {% endfor %}
+            </div>
+        </article>
+        {% endfor %}
+    </section>
+</body>

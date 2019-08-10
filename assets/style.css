@@ -57,44 +57,52 @@ summary {
   width: 100%;
 }
 
-#definitions {
+#definitions, #english_translations {
   border: 1px solid lightgrey;
   margin: 10px 0;
   border-radius: 5px;
 }
 
-#definitions h3 {
+#definitions h3, #english_translations h3 {
   padding: 10px 0 0 10px;
   margin: 0;
   font-size: medium;
   font-weight: normal;
 }
 
-#definitions > article {
+#definitions > article, #english_translations > article {
   display: grid;
-  grid-template-columns: min-content 1fr min-content;
   grid-gap: 10px;
   margin: 10px;
   padding-bottom: 5px;
   border-bottom: dotted 1.5px lightgray;
 }
 
-#definitions > article:last-of-type {
+#definitions > article {
+  grid-template-columns: min-content 1fr min-content;
+}
+
+#english_translations > article {
+  grid-template-columns: min-content min-content 1fr min-content;
+}
+
+#definitions > article:last-of-type, #english_translations > article:last-of-type {
     border-bottom: none;
 }
 
-#definitions .translation_line > p {
+#definitions .translation_line > p, #english_translations .translation_line > p {
     display: inline-block;
+  margin-right: 5px;
 }
 
-#definitions .number {
+#definitions .number, #english_translations .number {
   grid-column: 1;
   font-size: smaller;
   align-self: center;
   color: grey;
 }
 
-#definitions .badges {
+#definitions .badges, #english_translations .badges {
   display: flex;
 }
 
@@ -124,6 +132,7 @@ summary {
   margin: 0 2px;
   background: rgba(230,230,230,100);
   width: min-content;
+  height: min-content;
   white-space: nowrap;
   border-radius: 5px;
   font-size: 80%;

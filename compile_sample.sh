@@ -28,7 +28,7 @@ echo "Processing Dictionary"
 python3 ./dictionary_converter.py ./input/JMdict_e_sample.xml
 
 echo "Combining processed files"
-python3 ./combiner.py ./output/dictionary.xml ./output/kanji.xml ./output/sentences.xml -o ./build/JapaneseDictionary.xml
+python3 ./combiner.py ./output/dictionary.xml ./output/kanji.xml ./output/sentences.xml ./input/english.txt -o ./build/JapaneseDictionary.xml
 
 echo "Building dictionary (This will take a long time, i.e. 10+ minutes!)"
 cd build

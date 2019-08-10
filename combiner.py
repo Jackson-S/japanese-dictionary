@@ -31,6 +31,14 @@ class Definition:
         self.pos: List[str] = pos
         self.translations: List[str] = translations
 
+
+class Translation:
+    def __init__(self, japanese_word: str, context: List[str], pos: List[str]):
+        self.japanese_word: str = japanese_word
+        self.context_words: List[str] = context
+        self.pos: List[str] = pos
+
+
 class DictionaryEntry(Entry):
     def __init__(self, dictionary_entry: ElementTree.Element, sentences: Dict[str, Sentence], kanji_set: Set[str]):
         title = dictionary_entry.attrib["title"]
@@ -77,6 +85,32 @@ class DictionaryEntry(Entry):
         return len(self.definitions) != 0
 
 
+class EnglishDictionaryEntry(Entry):
+    def __init__(self, root_word: str):
+        super().__init__(root_word, "en", "dictionary")
+
+        self.translations: List[Translation] = []
+    
+    def add_translation(self, japanese_word: str, context: List[str], speech_parts: List[str]):
+        if self.get_containing_item(japanese_word, speech_parts):
+            existing_entry = self.get_containing_item(japanese_word, speech_parts)
+            for word in context:
+                if word not in existing_entry.context_words:
+                    existing_entry.context_words.append(word)
+        else:
+            deduped_context = list(set(context))
+            translation = Translation(japanese_word, deduped_context, speech_parts)
+            self.translations.append(translation)
+            self.translations.sort(key=lambda x: x.pos)
+            self.translations.sort(key=lambda x: x.context_words)
+    
+    def get_containing_item(self, japanese_word: str, pos: List[str]) -> Optional[Translation]:
+        for translation in self.translations:
+            if translation.japanese_word == japanese_word:
+                return translation
+        return None
+
+
 class KanjiEntry(Entry):
     def __init__(self, kanji_entry: ElementTree.Element):
         title = kanji_entry.attrib["title"]
@@ -121,7 +155,8 @@ class DictionaryOutput:
         )
         self.templates = {
             KanjiEntry: self.environment.get_template("kanji_page.html"),
-            DictionaryEntry: self.environment.get_template("definition_page.html")
+            DictionaryEntry: self.environment.get_template("japanese_definition_page.html"),
+            EnglishDictionaryEntry: self.environment.get_template("english_definition_page.html")
         }
 
         for page in pages.values():
@@ -168,10 +203,10 @@ class DictionaryOutput:
     def generate_entry(self, page: Entry):
         # If this is a kanji entry, and the kanji doesn't appear in the full dictionary 
         # then add an index and make it searchable
-        if (type(page) == KanjiEntry and not self.has_full_entry(page)) or type(page) == DictionaryEntry:
-            self._generate_full_entry(page)
-        else:
+        if type(page) == KanjiEntry and self.has_full_entry:
             self._generate_kanji_entry(page)
+        else:
+            self._generate_full_entry(page)
 
     def generate_page(self, page):
         return self.templates[type(page)].render(entry=page)
@@ -185,6 +220,7 @@ def main():
     parser.add_argument("dictionary", type=str)
     parser.add_argument("kanji", type=str)
     parser.add_argument("sentences", type=str)
+    parser.add_argument("english_wordlist", type=str)
     parser.add_argument("-o", type=str)
     args = parser.parse_args()
 
@@ -223,12 +259,44 @@ def main():
         new_entry: DictionaryEntry = DictionaryEntry(entry, sentence_index_list, kanji_set)
         if new_entry.is_worth_adding():
             pages[new_entry.page_title] = new_entry
+
+    english_pages = {}
+
+    with open(args.english_wordlist) as in_file:
+        for word in map(lambda x: x.strip(), in_file.readlines()):
+            english_pages[word] = EnglishDictionaryEntry(word)
+
+    for page in filter(lambda x: type(x) == DictionaryEntry, pages.values()):
+        for definition in page.definitions:
+            for translation in definition.translations:
+                alternative = translation.split("(")[0].strip()
+                context = [x for x in definition.translations if x != translation]
+                if translation in english_pages.keys():
+                    english_pages[translation].add_translation(page.page_title, context, definition.pos)
+                elif alternative in english_pages.keys():
+                    english_pages[alternative].add_translation(page.page_title, context, definition.pos)
+
+    for key in english_pages:
+        if len(english_pages[key].translations) != 0:
+            pages[key] = english_pages[key]
     
     dictionary = DictionaryOutput(pages)
     tree = ElementTree.ElementTree(dictionary.root)
     tree.write(args.o, "UTF-8", True)
-    
-    
+    del tree
+
+    entries = {"k": 0, "e": 0, "j": 0, "o": 0}
+    for entry in pages.values():
+        if type(entry) == KanjiEntry:
+            entries["k"] += 1
+        elif type(entry) == DictionaryEntry:
+            entries["j"] += 1
+        elif type(entry) == EnglishDictionaryEntry:
+            entries["e"] += 1
+        else:
+            entries["o"] += 1
+    print("Compiled:\n\t{} Kanji Pages\n\t{} Japanese Dictionary Pages\n\t{} English Dictionary Pages\n\t{} Other Pages".format(entries["k"], entries["j"], entries["e"], entries["o"]))
+
 
 if __name__ == "__main__":
     main()

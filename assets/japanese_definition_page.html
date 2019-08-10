@@ -1,0 +1,83 @@
+<body>
+    <section id="header">
+        <h1 id="page_title">{{ entry.page_title }}</h1>
+    </section>
+
+    <section id="sub_header">
+        {% if entry.readings | count > 0 or entry.kanji | count > 1 %}
+        <section id="readings">
+            {% if entry.readings | count > 0 %}
+            <section id="onyomi">
+                <h3 class="section_heading" apple_mouseover_disable="1">Readings</h3>
+                {% for reading in entry.readings %}
+                <div class="reading">
+                    <p>{{ reading.text }}</p>
+                    {% for info in reading.info %}
+                    <div class="badge">{{ info }}</div>
+                    {% endfor %}
+                </div>
+                {% endfor %}
+            </section>
+            {% endif %}
+
+            {% if entry.kanji | count > 1 %}
+            <section id="alt_kanji">
+                <h3 class="section_heading" apple_mouseover_disable="1">Alternate Kanji</h3>
+                {% for kanji in entry.kanji[1:] %}
+                <div class="reading">
+                    <p>{{ kanji.text }}</p>
+                    {% for info in kanji.info %}
+                    <div class="badge">{{ info }}</div>
+                    {% endfor %}
+                </div>
+                {% endfor %}
+            </section>
+            {% endif %}
+        </section>
+        {% endif %}
+
+        {% if entry.containing_kanji | count > 0 %}
+        <section id="containing_kanji">
+            <h3 class="section_heading" apple_mouseover_disable="1">Kanji in this Term</h3>
+            {% for kanji in entry.containing_kanji %}
+            <a href="x-dictionary:r:jp_kanji_{{ kanji }}">{{ kanji }}</a>
+            {% endfor %}
+        </section>
+        {% endif %}
+
+        {% if entry.sentences | count > 0 %}
+        <details id="sentences">
+            <summary class="section_heading" apple_mouseover_disable="1">Example Sentences</summary>
+            {% for sentence in entry.sentences %}
+            <article class="sentence">
+                <p>{{ sentence.japanese }}</p>
+                <p>{{ sentence.english }}</p>
+            </article>
+            {% endfor %}
+        </details>
+        {% endif %}
+    </section>
+
+    <section id="definitions">
+        <h3 class="section_heading" apple_mouseover_disable="1">Definitions</h3>
+        {% for definition in entry.definitions %}
+        <article>
+            <p class="number" apple_mouseover_disable="1">{{ loop.index }}</p>
+            <div class="translation_line">
+                {% for translation in definition.translations %}
+                {% if loop.last %}
+                <p class="translation">{{ translation }}</p>
+                {% else %}
+                <p class="translation">{{ translation }},</p>
+                {% endif %}
+                {% endfor %}
+            </div>
+            <div class="badges">
+                {% for pos in definition.pos %}
+                <div class="badge">{{ pos }}</div>
+                {% endfor %}
+            </div>
+        </article>
+        {% endfor %}
+    </section>
+</body>
