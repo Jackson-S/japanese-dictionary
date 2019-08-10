@@ -1,8 +1,19 @@
 #! /usr/bin/env bash
 
-echo "This build script requires a large amount of free ram (~6GB)!"
+echo "The full build script requires a large amount of free ram (~6GB)!"
 echo "You must also have installed the Apple Dictionary Development Kit"
 echo "Requires: Python3 and Jinja2 library (pip3 install jinja2)"
+echo ""
+echo "This script will compile a very small subset of the dictionary"
+echo "and is intended to be used to test changes, and that the program"
+echo "is able to compile without wasting half an hour finding out!"
+echo ""
+echo "Once compiled the available words are:"
+echo "  '赤' ('あか'), '毎日' ('まいにち'), 'red' and 'every day'"
+echo "The kanji 「毎」、「日」 and 「赤」 are also included, but are non-indexed"
+echo ""
+echo "A list of all indices can be seen by entering a single space in the"
+echo "search field of the Dictionary app."
 
 echo "Setting up build directory"
 
@@ -16,7 +27,9 @@ cp ./assets/style.css ./build/JapaneseDictionary.css
 mkdir build/OtherResources
 cp ./assets/prefs.html ./build/OtherResources/JapaneseDictionary_prefs
 mkdir build/OtherResources/Images
-unzip -d ./build/OtherResources/Images ./assets/kanjivg.zip > /dev/null
+
+# Uncomment this to enable Kanji stroke order images on the Kanji pages
+# unzip -d ./build/OtherResources/Images ./assets/kanjivg.zip > /dev/null
 
 mkdir output
 
@@ -26,17 +39,13 @@ echo "Processing Kanji"
 python3 ./kanjidic_converter.py ./input/kanjidic2_sample.xml
 echo "Processing Dictionary"
 python3 ./dictionary_converter.py ./input/JMdict_e_sample.xml
-
 echo "Combining processed files"
 python3 ./combiner.py ./output/dictionary.xml ./output/kanji.xml ./output/sentences.xml ./input/english.txt -o ./build/JapaneseDictionary.xml
 
-echo "Building dictionary (This will take a long time, i.e. 10+ minutes!)"
 cd build
-
+echo "Building dictionary (This will take a long time, i.e. 10+ minutes!)"
 make
-make install
+# Uncomment this to install the dictionary
+# make install
 
 cd ..
-
-# rm -rf output
-# rm -rf build

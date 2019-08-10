@@ -8,7 +8,7 @@
 
 # You need to edit these values.
 
-DICT_NAME		=	"JMdict (Japanese-Multilingual Dictionary)"
+DICT_NAME		=	"Japanese English Dictionary"
 DICT_SRC_PATH	=	JapaneseDictionary.xml
 CSS_PATH		=	JapaneseDictionary.css
 PLIST_PATH		=	JapaneseDictionary.plist

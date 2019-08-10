@@ -269,12 +269,17 @@ def main():
     for page in filter(lambda x: type(x) == DictionaryEntry, pages.values()):
         for definition in page.definitions:
             for translation in definition.translations:
-                alternative = translation.split("(")[0].strip()
+                variant_words = [
+                    translation,
+                    translation.split("(")[0].strip(), # Account for translations like 'Red (communist)'
+                    translation.replace("to ", ""), # Account for words given in infinitive (?) form i.e. 'to get up'
+                    translation.replace("to ", "").split("(")[0].strip() # Account for a mix of above
+                ]
                 context = [x for x in definition.translations if x != translation]
-                if translation in english_pages.keys():
-                    english_pages[translation].add_translation(page.page_title, context, definition.pos)
-                elif alternative in english_pages.keys():
-                    english_pages[alternative].add_translation(page.page_title, context, definition.pos)
+
+                for word in variant_words:
+                    if word in english_pages.keys():
+                        english_pages[word].add_translation(page.page_title, context, definition.pos)
 
     for key in english_pages:
         if len(english_pages[key].translations) != 0:
