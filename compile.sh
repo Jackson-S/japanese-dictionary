@@ -30,7 +30,8 @@ python3 ./dictionary_converter.py ./input/JMdict_e.xml
 echo "Combining processed files"
 python3 ./combiner.py ./output/dictionary.xml ./output/kanji.xml ./output/sentences.xml ./input/english.txt -o ./build/JapaneseDictionary.xml
 
-echo "Building dictionary (This will take a long time, i.e. 10+ minutes!)"
+echo "Building dictionary (This will take a long time, i.e. 10+ minutes"
+echo "for unoptimised, 1-2 hours for optimised)"
 cd build
 
 make

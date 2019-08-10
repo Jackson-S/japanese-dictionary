@@ -4,6 +4,24 @@
 d|entry {
 }
 
+h1	{
+	font-size: 150%;
+}
+
+h3	{
+	font-size: 100%;
+}
+
+span.column {
+	display: block;
+	border: solid 2px #c0c0c0;
+	margin-left: 2em;
+	margin-right: 2em;
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+	padding: 0.5em;
+}
+
 p {
   margin: 0px 0;
   width: min-content;
@@ -12,10 +30,6 @@ p {
 
 summary {
   cursor: pointer !important;
-}
-
-#header, #sub_header, #definitions {
-  max-width: 600px;
 }
 
 #sub_header {
@@ -136,4 +150,11 @@ summary {
   white-space: nowrap;
   border-radius: 5px;
   font-size: 80%;
+}
+
+@media (prefers-dark-interface)
+{
+	body {
+		color: white;
+	}
 }

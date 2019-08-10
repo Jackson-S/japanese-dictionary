@@ -8,12 +8,12 @@ from jinja2 import Template, Environment, FileSystemLoader, select_autoescape, e
 
 from itertools import chain
 
-verb_badges = ["Ichidan (くれる)", "Godan (〜ある)", "Godan (〜ぶ)", "Godan (〜ぐ)",
+verb_badges = ["Ichidan", "Ichidan (くれる)", "Godan (〜ある)", "Godan (〜ぶ)", "Godan (〜ぐ)",
                "Godan (いく・ゆく)", "Godan (〜く)", "Godan (〜む)", "Godan (〜ぬ)",
                "Godan Irregular (〜る)", "Godan (〜る)", "Godan (〜す)",
                "Godan (〜つ)", "Godan Irregular (〜う)", "Godan (〜う)", "Verb (くる)",
                "Verb Irregular (ぬ)", "Verb Irregular (る→り)", "Verb (する)",
-               "Ichidan (ずる)"]
+               "Ichidan (ずる)", "Intransitive", "Transitive Verb"]
 adjective_badges = ["Adjective (よい)", "Adjective (たる)"]
 adverb_badges = ["Adverb (〜と)"]
 noun_badges = ["Noun (Temporal)", "Noun/Participle Taking する"]
