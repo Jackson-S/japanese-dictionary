@@ -1,5 +1,5 @@
-import argparse
 import csv
+import argparse
 import xml.etree.ElementTree as ElementTree
 
 from typing import Optional, List, Dict
@@ -10,33 +10,15 @@ class WordIndex:
         # The headword as it appears in the dictionary. This will take the Kanji form if available
         self.dictionary_form: str = self.get_headword(parameters)
 
-        # The reading of the word in context as related to the dictionary entry, in hiragana.
-        self.reading: Optional[str] = self.get_parameter(
-            parameters, ["(", ")"])
-
         # The sense that the word takes in the context of the sentence as it appears in JMdict
         self.sense_number = self.get_parameter(parameters, ["[", "]"])
 
-        # The reading of the word in context, in the form it appears in the sentence, in hiragana
-        self.sentence_form = self.get_parameter(parameters, ["{", "}"])
-
     def get_headword(self, parameters: str):
-        if "|" in parameters:
-            return parameters[:parameters.index("|")]
-        if "(" in parameters:
-            return parameters[:parameters.index("(")]
-        if "[" in parameters:
-            return parameters[:parameters.index("[")]
-        if "{" in parameters:
-            return parameters[:parameters.index("{")]
-        if "~" in parameters:
-            return parameters[:parameters.index("~")]
-
-        if parameters != "":
-            return parameters
-        else:
-            raise ValueError(
-                "Parameters list is blank and contains no headword")
+        stop_chars = {"|", "(", "[", "{", "~"}
+        for index, char in enumerate(parameters):
+            if char in stop_chars:
+                return parameters[:index]
+        return parameters
 
     def get_parameter(self, parameters: str, contained_by: List[str]) -> Optional[str]:
         # Find the positions of the left and right containing brackets. If not found
@@ -52,11 +34,11 @@ class WordIndex:
 
 
 class SentencePair:
-    def __init__(self, jp_index: str, en_index: str, indices: str, sentence_list: Dict[str, str]):
+    def __init__(self, jp_sentence: str, en_sentence: str, indices: str):
         # The sentence in Japanese
-        self.jp: str = sentence_list[jp_index]
+        self.jp: str = jp_sentence
         # The sentence in English
-        self.en: str = sentence_list[en_index]
+        self.en: str = en_sentence
 
         # A List of indices that the dictionary will use the assign appropriate
         # sentences, made up of the words contained within the sentence.
@@ -90,46 +72,34 @@ def main():
     sentence_list: Dict[str, str] = {}
 
     for index, language, sentence in string_csv:
-        if language in {"jpn", "eng"} and int(index) >= 0:
-            # Warn if overwriting a previous sentence entry
-            if index in sentence_list.keys():
-                print("Overwriting index {}".format(index))
-
+        if int(index) > 0 and (language == "jpn" or language == "eng"):
             sentence_list[index] = sentence
 
     # Generate pairs of Japanese and English sentences with metadata
     sentence_pairs: List[SentencePair] = []
 
-    for japanese_id, english_id, indices in index_csv:
-        if japanese_id in sentence_list and english_id in sentence_list:
-            try:
-                pair = SentencePair(japanese_id, english_id,
-                                    indices, sentence_list)
-            except ValueError:
-                pass
-            sentence_pairs.append(pair)
-
-    # Remove the sentence list from memory
-    del sentence_list
+    for jp_id, en_id, parameters in index_csv:
+        # Check there's at least one verified word
+        if "~" in parameters:
+            if jp_id in sentence_list and en_id in sentence_list:
+                jp_sentence = sentence_list[jp_id]
+                en_sentence = sentence_list[en_id]
+                sentence_pair = SentencePair(
+                    jp_sentence, en_sentence, parameters)
+                sentence_pairs.append(sentence_pair)
 
     root = ElementTree.Element("sentences")
 
     # Generate an XML tree to output
     for pair in sentence_pairs:
-        sentence_node = ElementTree.SubElement(
-            root, "entry", {"jp": pair.jp, "en": pair.en})
+        attributes = {"jp": pair.jp, "en": pair.en}
+        sentence_node = ElementTree.SubElement(root, "entry", attributes)
 
         for index in pair.indices:
             attributes = {"dictionary_form": index.dictionary_form}
 
-            if index.reading:
-                attributes["reading"] = index.reading
-
             if index.sense_number:
                 attributes["sense_index"] = index.sense_number
-
-            if index.sentence_form:
-                attributes["sentence_form"] = index.sentence_form
 
             ElementTree.SubElement(sentence_node, "index", attributes)
 
