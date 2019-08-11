@@ -32,6 +32,10 @@ summary {
   cursor: pointer !important;
 }
 
+summary:focus {
+  outline: none;
+}
+
 #sub_header {
   display: grid;
   grid-gap: 10px;
@@ -67,7 +71,7 @@ summary {
   margin-right: 10px;
 }
 
-#sub_header > #stroke_order img {
+#sub_header > #stroke_order > img {
   width: 100%;
 }
 

@@ -33,7 +33,7 @@
         </section>
         {% endif %}
 
-        {% if entry.nanor | count > 0 %}
+        {% if entry.nanori | count > 0 %}
         <details id="nanori">
             <summary class="section_heading" apple_mouseover_disable="1">Nanori</summary>
             {% for reading in entry.nanori %}
@@ -47,10 +47,13 @@
         {% endif %}
 
 
+        {% if entry.image %}
         <details id="stroke_order">
             <summary class="section_heading" apple_mouseover_disable="1">Stroke Order</summary>
             <img src="Images/{{ entry.image }}" />
         </details>
+
+        {% endif %}
     </section>
 
     <section id="definitions">

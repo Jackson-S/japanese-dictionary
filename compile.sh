@@ -14,9 +14,9 @@ cp ./assets/Makefile ./build/Makefile
 cp ./assets/info.plist ./build/JapaneseDictionary.plist
 cp ./assets/style.css ./build/JapaneseDictionary.css
 mkdir build/OtherResources
-cp ./assets/prefs.html ./build/OtherResources/JapaneseDictionary_prefs
+cp ./assets/prefs.html ./build/OtherResources/JapaneseDictionary_prefs.html
 mkdir build/OtherResources/Images
-unzip -d ./build/OtherResources/Images ./assets/kanjivg.zip > /dev/null
+unzip -d ./build/OtherResources/Images/ ./assets/kanjivg.zip > /dev/null
 
 mkdir output
 

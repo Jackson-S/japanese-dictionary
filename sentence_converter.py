@@ -1,6 +1,5 @@
 import argparse
 import csv
-
 import xml.etree.ElementTree as ElementTree
 
 from typing import Optional, List, Dict

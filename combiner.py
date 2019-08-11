@@ -1,12 +1,15 @@
+import os
+import base64
 import argparse
-
 import xml.etree.ElementTree as ElementTree
 
+from itertools import chain
 from typing import Union, List, Optional, Set, Dict
 
-from jinja2 import Template, Environment, FileSystemLoader, select_autoescape, exceptions
+import MeCab
+import jaconv
 
-from itertools import chain
+from jinja2 import Template, Environment, FileSystemLoader, select_autoescape, exceptions
 
 verb_badges = ["Ichidan", "Ichidan (くれる)", "Godan (〜ある)", "Godan (〜ぶ)", "Godan (〜ぐ)",
                "Godan (いく・ゆく)", "Godan (〜く)", "Godan (〜む)", "Godan (〜ぬ)",
@@ -20,6 +23,8 @@ noun_badges = ["Noun (Temporal)", "Noun/Participle Taking する"]
 
 
 class Sentence:
+    MECAB_PARSER = MeCab.Tagger("-Ochasen")
+
     def __init__(self, tag: ElementTree.Element):
         self.english = tag.attrib["en"]
         self.japanese = tag.attrib["jp"]
@@ -27,6 +32,29 @@ class Sentence:
                          for x in tag.findall("index")])
         self.sense_indices = {x.attrib["dictionary_form"]: x.attrib["sense_index"]
                               for x in tag.findall("index") if "sense_index" in x.attrib}
+        self.furigana_html = self.generate_furigana(self.japanese)
+
+    def generate_furigana(self, japanese_sentence: str) -> str:
+        parser_output = self.MECAB_PARSER.parse(japanese_sentence).splitlines()
+
+        result = ""
+
+        # Only loop over the relevant lines (Remove the EOS tag at the end)
+        for line in parser_output[:-1]:
+            # Split the lines by tab to tokenise
+            line_split = line.split("\t")
+
+            if len(line_split) > 1:
+                replacement = jaconv.kata2hira(line_split[1])
+                permutations = { replacement, jaconv.hira2kata(line_split[1]) }
+                if line_split[0] not in permutations:
+                    result += "<ruby>{}<rt>{}</rt></ruby>".format(line_split[0], replacement)
+                else:
+                    result += line_split[0]
+            else:
+                result += line_split[0]
+        
+        return result
 
 
 class Entry:
@@ -148,11 +176,16 @@ class EnglishDictionaryEntry(Entry):
 
 
 class KanjiEntry(Entry):
-    def __init__(self, kanji_entry: ElementTree.Element):
+    def __init__(self, kanji_entry: ElementTree.Element, image_set: List[str]):
         title = kanji_entry.attrib["title"]
         super().__init__(title, "jp", "kanji")
 
-        self.image: str = kanji_entry.attrib["image"]
+        
+        # Check if the image actually exists first
+        if kanji_entry.attrib["image"] not in image_set:
+            self.image = None
+        else:
+            self.image = kanji_entry.attrib["image"]
 
         readings = kanji_entry.find("readings")
 
@@ -245,7 +278,7 @@ class DictionaryOutput:
         html_page = self.generate_page(page)
 
         for element in ElementTree.fromstring(html_page):
-            xml_page.append(element)
+                xml_page.append(element)
 
     def generate_entry(self, page: Entry):
         # If this is a kanji entry, and the kanji doesn't appear in the full dictionary
@@ -273,14 +306,18 @@ def main():
     tree = ElementTree.parse(args.kanji)
     root = tree.getroot()
 
+    image_list = os.listdir("./build/OtherResources/Images")
+    image_list = set(filter(lambda x: ".svg" in x, image_list))
+
     # Create all the pages for the kanji
     kanji_list = []
     for entry in root:
-        new_entry: KanjiEntry = KanjiEntry(entry)
+        new_entry: KanjiEntry = KanjiEntry(entry, image_list)
         pages[new_entry.page_id] = new_entry
         kanji_list.append(new_entry.page_title)
     kanji_set = set(kanji_list)
     del kanji_list
+    del image_list
 
     tree = ElementTree.parse(args.sentences)
     root = tree.getroot()
@@ -342,18 +379,20 @@ def main():
     tree.write(args.o, "UTF-8", True)
     del tree
 
-    entries = {"k": 0, "e": 0, "j": 0, "o": 0}
+    entries = {"k": 0, "e": 0, "j": 0, "o": 0, "ki": 0}
     for entry in pages.values():
         if type(entry) == KanjiEntry:
             entries["k"] += 1
+            if entry.image:
+                entries["ki"] += 1
         elif type(entry) == DictionaryEntry:
             entries["j"] += 1
         elif type(entry) == EnglishDictionaryEntry:
             entries["e"] += 1
         else:
             entries["o"] += 1
-    print("Compiled:\n\t{} Kanji Pages\n\t{} Japanese Dictionary Pages\n\t{} English Dictionary Pages\n\t{} Other Pages".format(
-        entries["k"], entries["j"], entries["e"], entries["o"]))
+    print("Compiled:\n\t{} Kanji Pages ({} with stroke order)\n\t{} Japanese Dictionary Pages\n\t{} English Dictionary Pages\n\t{} Other Pages".format(
+        entries["k"], entries["ki"], entries["j"], entries["e"], entries["o"]))
 
 
 if __name__ == "__main__":
