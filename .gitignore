@@ -128,3 +128,5 @@ objects/
 
 # Translation Output
 project/JapaneseDictionary.xml
+output
+build
