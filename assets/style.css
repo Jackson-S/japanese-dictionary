@@ -1,6 +1,7 @@
 @charset "UTF-8";
 @namespace d url(http://www.apple.com/DTDs/DictionaryService-1.0.rng);
 
+/* Taken from Apple template */
 d|entry {
 }
 
@@ -21,7 +22,10 @@ span.column {
 	margin-bottom: 0.5em;
 	padding: 0.5em;
 }
+/* End Apple Template */
 
+
+/* Element styles */
 p {
   margin: 0px 0;
   width: min-content;
@@ -35,7 +39,9 @@ summary {
 summary:focus {
   outline: none;
 }
+/* End Element Styles */
 
+/* ID styles */
 #sub_header {
   display: grid;
   grid-gap: 10px;
@@ -52,7 +58,9 @@ summary:focus {
   display: grid;
   grid-template-columns: 1fr 1fr;
 }
+/* End ID styles */
 
+/* Class styles */
 .section_heading {
   cursor: default;
   font-size: small;
@@ -60,6 +68,30 @@ summary:focus {
   margin: 2px 0;
 }
 
+.sentence {
+  width: 100%;
+  padding: 10px 0;
+}
+
+.sentence > p {
+  white-space: normal;
+  width: 100%;
+}
+
+.badge {
+  display: inline-block;
+  padding: 2px 5px;
+  margin: 0 2px;
+  background: rgb(230,230,230);
+  width: min-content;
+  height: min-content;
+  white-space: nowrap;
+  border-radius: 5px;
+  font-size: 80%;
+}
+/* End class styles */
+
+/* Sub-element styles */
 #sub_header > #nanori > p {
   display: inline-block;
 }
@@ -137,38 +169,37 @@ summary:focus {
   font-size: larger;
   margin-right: 5px;
 }
+/* End sub-element styles */
 
-.sentence {
-  width: 100%;
-  padding: 10px 0;
+/* Dark mode style */
+@media (prefers-dark-interface)
+{
+  /* Set all text to white */
+	body, #containing_kanji a {
+		color: white;
+  }
+  
+  /* Change the background colour of all elements with a background to be darker */
+  #sub_header > details, #sub_header > section, .badge {
+    background-color: rgb(80,80,80);
+  }
 }
+/* End dark mode style */
 
-.sentence > p {
-  white-space: normal;
-  width: 100%;
-}
-
-.badge {
-  display: inline-block;
-  padding: 2px 5px;
-  margin: 0 2px;
-  background: rgb(230,230,230);
-  width: min-content;
-  height: min-content;
-  white-space: nowrap;
-  border-radius: 5px;
-  font-size: 80%;
-}
-
-/* Popup style - All prefaced with html.apple_client-panel */
-
+/* Popup styles - All prefaced with html.apple_client-panel
+ * These styles apply to the popup definition box that appears
+ * on a three finger tap or force touch on a word.
+ *
+ * They are all prefaced with html.apple_client-panel.
+ */
 /* Hide subheader and badges to reduce onscreen elements */
 html.apple_client-panel #sub_header,
 html.apple_client-panel .badge,
-.section_heading {
+html.apple_client-panel .section_heading {
   display: none;
 }
 
+/* Set the title font to be small */
 html.apple_client-panel #page_title {
   font-size: small;
 }
@@ -183,25 +214,15 @@ html.apple_client-panel #english_translations > article {
   margin: 0;
 }
 
+/* Reduce spacing inbetween definitions in translation text */
 html.apple_client-panel #definitions .translation_line > p, 
 html.apple_client-panel #english_translations .translation_line > p {
   margin-right: 2px;
 }
 
+/* Reduce the size of the definition numbers */
 html.apple_client-panel #definitions .number, 
 html.apple_client-panel #english_translations .number {
   font-size: 10px;
 }
-
-/* End popup styles */
-
-@media (prefers-dark-interface)
-{
-	body {
-		color: white;
-	}
-  
-  #sub_header > details, #sub_header > section, .badge {
-    background-color: rgb(80,80,80);
-  }
-}
+/* End popup style */
