@@ -27,7 +27,7 @@ cp ./assets/style.css ./build/JapaneseDictionary.css
 mkdir build/OtherResources
 cp ./assets/prefs.html ./build/OtherResources/JapaneseDictionary_prefs.html
 mkdir build/OtherResources/Images
-unzip -d ./build/OtherResources/Images ./assets/kanjivg.zip > /dev/null
+tar -xzf ./assets/kanjivg.tar.xz -C ./build/OtherResources/Images
 
 mkdir output
 
