@@ -1,20 +1,21 @@
-import MeCab
-import jaconv
 import xml.etree.ElementTree as ElementTree
 
-
+from dataclasses import dataclass
 from typing import List, Optional, Set, Dict
 
+import MeCab
+import jaconv
 
-verb_badges = ["Ichidan", "Ichidan (くれる)", "Godan (〜ある)", "Godan (〜ぶ)", "Godan (〜ぐ)",
+
+VERB_BADGES = ["Ichidan", "Ichidan (くれる)", "Godan (〜ある)", "Godan (〜ぶ)", "Godan (〜ぐ)",
                "Godan (いく・ゆく)", "Godan (〜く)", "Godan (〜む)", "Godan (〜ぬ)",
                "Godan Irregular (〜る)", "Godan (〜る)", "Godan (〜す)",
                "Godan (〜つ)", "Godan Irregular (〜う)", "Godan (〜う)", "Verb (くる)",
                "Verb Irregular (ぬ)", "Verb Irregular (る→り)", "Verb (する)",
                "Ichidan (ずる)", "Intransitive", "Transitive Verb"]
-adjective_badges = ["Adjective (よい)", "Adjective (たる)"]
-adverb_badges = ["Adverb (〜と)"]
-noun_badges = ["Noun (Temporal)", "Noun/Participle Taking する"]
+ADJECTIVE_BADGES = ["Adjective (よい)", "Adjective (たる)"]
+ADVERB_BADGES = ["Adverb (〜と)"]
+NOUN_BADGES = ["Noun (Temporal)", "Noun/Participle Taking する"]
 
 
 class Sentence:
@@ -41,14 +42,14 @@ class Sentence:
 
             if len(line_split) > 1:
                 replacement = jaconv.kata2hira(line_split[1])
-                permutations = { replacement, jaconv.hira2kata(line_split[1]) }
+                permutations = {replacement, jaconv.hira2kata(line_split[1])}
                 if line_split[0] not in permutations:
                     result += "<ruby>{}<rt>{}</rt></ruby>".format(line_split[0], replacement)
                 else:
                     result += line_split[0]
             else:
                 result += line_split[0]
-        
+
         return result
 
 
@@ -58,18 +59,21 @@ class Entry:
         self.page_id: str = "{}_{}_{}".format(language, entry_type, page_title)
 
 
+@dataclass
 class Reading:
     def __init__(self, reading: str, info: List[str]):
         self.text: str = reading
         self.info: List[str] = info
 
 
+@dataclass
 class Definition:
     def __init__(self, pos: List[str], translations: List[str]):
         self.pos: List[str] = pos
         self.translations: List[str] = translations
 
 
+@dataclass
 class Translation:
     def __init__(self, japanese_word: str, context: List[str], pos: List[str]):
         self.japanese_word: str = japanese_word
@@ -78,8 +82,8 @@ class Translation:
 
 
 class DictionaryEntry(Entry):
-    def __init__(self, dictionary_entry: ElementTree.Element, sentences: Dict[str, Sentence], kanji_set: Set[str]):
-        title = dictionary_entry.attrib["title"]
+    def __init__(self, entry: ElementTree.Element, sentences: Dict[str, Sentence], kanji_set: Set[str]):
+        title = entry.attrib["title"]
         super().__init__(title, "jp", "dictionary")
 
         # Takes a dictionary entry and checks for containing kanji
@@ -90,7 +94,7 @@ class DictionaryEntry(Entry):
             x.sense_indices.get(self.page_title, 1000)))
 
         self.readings: List[Reading] = []
-        for reading in dictionary_entry.find("readings").findall("reading"):
+        for reading in entry.find("readings").findall("reading"):
             name = reading.attrib["text"]
             info_list = []
             for info in reading.findall("info"):
@@ -98,7 +102,7 @@ class DictionaryEntry(Entry):
             self.readings.append(Reading(name, info_list))
 
         self.kanji: List[Reading] = []
-        for kanji in dictionary_entry.find("kanji").findall("form"):
+        for kanji in entry.find("kanji").findall("form"):
             name = kanji.attrib["text"]
             info_list = []
             for info in kanji.findall("info"):
@@ -106,7 +110,7 @@ class DictionaryEntry(Entry):
             self.kanji.append(Reading(name, info_list))
 
         self.definitions: List[Definition] = []
-        for definition in dictionary_entry.find("definitions").findall("definition"):
+        for definition in entry.find("definitions").findall("definition"):
             pos = [x.text for x in definition.findall("pos")]
             translations = [x.text for x in definition.findall("translation")]
             if len(translations) > 0:
@@ -157,25 +161,25 @@ class EnglishDictionaryEntry(Entry):
     def simplify_speech_parts(self, speech_parts: List[str]) -> List[str]:
         simplified_speech_parts = []
         for item in speech_parts:
-            if item in verb_badges:
+            if item in VERB_BADGES:
                 simplified_speech_parts.append("Verb")
-            elif item in noun_badges:
+            elif item in NOUN_BADGES:
                 simplified_speech_parts.append("Noun")
-            elif item in adjective_badges:
+            elif item in ADJECTIVE_BADGES:
                 simplified_speech_parts.append("Adjective")
-            elif item in adverb_badges:
+            elif item in ADVERB_BADGES:
                 simplified_speech_parts.append("Adverb")
             else:
                 simplified_speech_parts.append(item)
         return sorted(list(set(simplified_speech_parts)))
 
 
+@dataclass
 class KanjiEntry(Entry):
     def __init__(self, kanji_entry: ElementTree.Element, image_set: List[str]):
         title = kanji_entry.attrib["title"]
         super().__init__(title, "jp", "kanji")
 
-        
         # Check if the image actually exists first
         if kanji_entry.attrib["image"] not in image_set:
             self.image = None

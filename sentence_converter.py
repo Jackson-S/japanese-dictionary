@@ -72,7 +72,7 @@ def main():
     sentence_list: Dict[str, str] = {}
 
     for index, language, sentence in string_csv:
-        if int(index) > 0 and (language == "jpn" or language == "eng"):
+        if int(index) > 0 and language in ("jpn", "eng"):
             sentence_list[index] = sentence
 
     # Generate pairs of Japanese and English sentences with metadata

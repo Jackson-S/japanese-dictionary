@@ -2,113 +2,152 @@ import os
 import argparse
 import xml.etree.ElementTree as ElementTree
 
-from typing import List
+from typing import Set, Dict
 
-from DictionaryEntry import *
-from DictionaryOutput import *
+from DictionaryEntry import Entry, DictionaryEntry, EnglishDictionaryEntry, KanjiEntry, Sentence
+from DictionaryOutput import DictionaryOutput
+
+def get_stats(pages):
+    entries = {
+        "kanji": 0,
+        "english": 0,
+        "japanese": 0,
+        "other": 0,
+        "kanji_image": 0,
+    }
+
+    for entry in pages:
+        if isinstance(entry, KanjiEntry):
+            entries["kanji"] += 1
+            if entry.image:
+                entries["kanji_image"] += 1
+        elif isinstance(entry, DictionaryEntry):
+            entries["japanese"] += 1
+        elif isinstance(entry, EnglishDictionaryEntry):
+            entries["english"] += 1
+        else:
+            entries["other"] += 1
+
+    output_text = [
+        "Created:",
+        "{} kanji pages ({} with stroke order)".format(entries["kanji"], entries["kanji_image"]),
+        "{} japanese entries".format(entries["japanese"]),
+        "{} english entries".format(entries["english"]),
+        "{} other entries".format(entries["other"])
+    ]
+
+    print("\n    ".join(output_text))
 
 
-def main():
-    pages = dict()
-
+def get_arguments():
     parser = argparse.ArgumentParser()
     parser.add_argument("dictionary", type=str)
     parser.add_argument("kanji", type=str)
     parser.add_argument("sentences", type=str)
     parser.add_argument("english_wordlist", type=str)
     parser.add_argument("-o", type=str)
-    args = parser.parse_args()
+    return parser.parse_args()
 
-    tree = ElementTree.parse(args.kanji)
+
+def create_kanji_pages(kanji_path: str, kanji_images: Set[str]) -> Dict[str, KanjiEntry]:
+    result = dict()
+
+    # Open the kanji XML file
+    tree = ElementTree.parse(kanji_path)
     root = tree.getroot()
-
-    image_list = os.listdir("./build/OtherResources/Images")
-    image_list = set(filter(lambda x: ".svg" in x, image_list))
 
     # Create all the pages for the kanji
-    kanji_list = []
     for entry in root:
-        new_entry: KanjiEntry = KanjiEntry(entry, image_list)
-        pages[new_entry.page_id] = new_entry
-        kanji_list.append(new_entry.page_title)
-    kanji_set = set(kanji_list)
-    del kanji_list
-    del image_list
+        new_entry = KanjiEntry(entry, kanji_images)
+        result[new_entry.page_id] = new_entry
 
-    tree = ElementTree.parse(args.sentences)
-    root = tree.getroot()
+    return result
 
-    sentence_list: List[Sentence] = []
-    for entry in root:
-        sentence_list.append(Sentence(entry))
 
+def create_japanese_pages(dict_path: str, sentence_path: str, kanji: Set[str]) -> Dict[str, DictionaryEntry]:
+    sentence_tree = ElementTree.parse(sentence_path)
+    sentence_root = sentence_tree.getroot()
+
+    # Maps words to sentences containing them
     sentence_index_list = {}
-    for sentence in sentence_list:
+    for item in sentence_root:
+        # Create a sentence object, which will process and split the sentence
+        sentence = Sentence(item)
+
         for key in sentence.keys:
-            if key in sentence_index_list:
-                sentence_index_list[key].append(sentence)
-            else:
-                sentence_index_list[key] = [sentence]
-    del sentence_list
+            sentence_index_list.setdefault(key, [])
+            sentence_index_list[key].append(sentence)
 
-    tree = ElementTree.parse(args.dictionary)
-    root = tree.getroot()
+    dictionary_tree = ElementTree.parse(dict_path)
+    dictionary_root = dictionary_tree.getroot()
 
-    for entry in root:
-        new_entry: DictionaryEntry = DictionaryEntry(
-            entry, sentence_index_list, kanji_set)
+    result = dict()
+
+    for entry in dictionary_root:
+        new_entry = DictionaryEntry(entry, sentence_index_list, kanji)
         if new_entry.is_worth_adding():
-            pages[new_entry.page_title] = new_entry
+            result[new_entry.page_title] = new_entry
 
-    english_pages = {}
+    return result
 
-    with open(args.english_wordlist) as in_file:
-        for word in map(lambda x: x.strip(), in_file.readlines()):
-            english_pages[word] = EnglishDictionaryEntry(word)
 
-    for page in filter(lambda x: type(x) == DictionaryEntry, pages.values()):
+def create_english_pages(english_wordlist_path: str, japanese_entries: Set[DictionaryEntry]) -> Dict[str, EnglishDictionaryEntry]:
+    english_wordlist = set()
+    result: Dict[str, EnglishDictionaryEntry] = dict()
+
+    with open(english_wordlist_path) as in_file:
+        english_wordlist = set(x.strip() for x in in_file.readlines())
+
+    for page in japanese_entries:
         for definition in page.definitions:
             for translation in definition.translations:
-                variant_words = [
+                variant_words = (
                     translation,
+
                     # Account for translations like 'Red (communist)'
                     translation.split("(")[0].strip(),
-                    # Account for words given in infinitive (?) form i.e. 'to get up'
+
+                    # Account for words given in the infinitive i.e. 'to get up'
                     translation.replace("to ", ""),
-                    translation.replace("to ", "").split(
-                        "(")[0].strip()  # Account for a mix of above
-                ]
+
+                    # Account for a mix of above
+                    translation.replace("to ", "").split("(")[0].strip()
+                )
 
                 for word in variant_words:
-                    if word in english_pages.keys():
-                        context = [
-                            x for x in definition.translations if x != word]
-                        english_pages[word].add_translation(
-                            page.page_title, context, definition.pos)
+                    if word in english_wordlist:
+                        context = [x for x in definition.translations if x != word]
+                        result.setdefault(word, EnglishDictionaryEntry(word))
+                        result[word].add_translation(page.page_title, context, definition.pos)
 
-    for key in english_pages:
-        if len(english_pages[key].translations) != 0:
-            pages[key] = english_pages[key]
+    return result
+
+
+def main():
+    args = get_arguments()
+
+    # This will contain all the pages for the dictionary as they are added
+    pages: Dict[str, Entry] = dict()
+
+    image_set = set(filter(lambda x: ".svg" in x, os.listdir("./build/OtherResources/Images")))
+
+    pages = {**pages, **create_kanji_pages(args.kanji, image_set)}
+
+    # Create a set of kanji-only pages
+    kanji_set = set(x.page_title for x in pages.values())
+
+    pages = {**pages, **create_japanese_pages(args.dictionary, args.sentences, kanji_set)}
+
+    japanese_entries = set(filter(lambda x: isinstance(x, DictionaryEntry), pages.values()))
+
+    pages = {**pages, **create_english_pages(args.english_wordlist, japanese_entries)}
 
     dictionary = DictionaryOutput(pages)
+
     tree = ElementTree.ElementTree(dictionary.root)
     tree.write(args.o, "UTF-8", True)
-    del tree
 
-    entries = {"k": 0, "e": 0, "j": 0, "o": 0, "ki": 0}
-    for entry in pages.values():
-        if type(entry) == KanjiEntry:
-            entries["k"] += 1
-            if entry.image:
-                entries["ki"] += 1
-        elif type(entry) == DictionaryEntry:
-            entries["j"] += 1
-        elif type(entry) == EnglishDictionaryEntry:
-            entries["e"] += 1
-        else:
-            entries["o"] += 1
-    print("Compiled:\n\t{} Kanji Pages ({} with stroke order)\n\t{} Japanese Dictionary Pages\n\t{} English Dictionary Pages\n\t{} Other Pages".format(
-        entries["k"], entries["ki"], entries["j"], entries["e"], entries["o"]))
+    get_stats(pages.values())
 
 
 if __name__ == "__main__":

@@ -1,16 +1,15 @@
 import xml.etree.ElementTree as ElementTree
 
 from itertools import chain
-
-from jinja2 import Template, Environment, FileSystemLoader, select_autoescape, exceptions
-
-from DictionaryEntry import *
+from jinja2 import Environment, FileSystemLoader, select_autoescape
+from DictionaryEntry import Entry, DictionaryEntry, EnglishDictionaryEntry, KanjiEntry
 
 
 class DictionaryOutput:
     def __init__(self, pages):
-        self.full_entries = set(
-            [page.page_title for page in pages.values() if type(page) == DictionaryEntry])
+        dict_entries = filter(lambda x: isinstance(x, DictionaryEntry), pages.values())
+        self.full_entries = set(map(lambda x: x.page_title, dict_entries))
+
         self.root: ElementTree.Element = ElementTree.Element(
             "d:dictionary",
             {
@@ -35,7 +34,7 @@ class DictionaryOutput:
         for page in pages.values():
             self.generate_entry(page)
 
-    def has_full_entry(self, kanji_page: Entry):
+    def has_full_entry(self, kanji_page: KanjiEntry):
         return kanji_page.page_title in self.full_entries
 
     def _generate_full_entry(self, page: Entry):
@@ -46,19 +45,19 @@ class DictionaryOutput:
         )
 
         # Create an index for the initial character
-        ElementTree.SubElement(xml_page, "d:index", {
-                               "d:title": page.page_title, "d:value": page.page_title})
+        attribs = {"d:title": page.page_title, "d:value": page.page_title}
+        ElementTree.SubElement(xml_page, "d:index", attribs)
 
         readings = []
 
-        if type(page) == KanjiEntry:
+        if isinstance(page, KanjiEntry):
             readings = [x for x in chain(page.on_yomi, page.kun_yomi)]
-        elif type(page) == DictionaryEntry:
+        elif isinstance(page, DictionaryEntry):
             readings = [x.text for x in page.readings]
 
         for reading in readings:
-            ElementTree.SubElement(xml_page, "d:index", {
-                                   "d:yomi": reading, "d:title": page.page_title, "d:value": reading})
+            attribs = {"d:yomi": reading, "d:title": page.page_title, "d:value": reading}
+            ElementTree.SubElement(xml_page, "d:index", attribs)
 
         html_page = self.generate_page(page)
 
@@ -67,20 +66,20 @@ class DictionaryOutput:
 
     def _generate_kanji_entry(self, page: Entry):
         # Create the primary node
+        attribs = {"id": page.page_id, "d:title":  f"{page.page_title} (Kanji Form)"}
         xml_page = ElementTree.SubElement(
-            self.root, "d:entry", {
-                "id": page.page_id, "d:title":  "{} (Kanji Form)".format(page.page_title)}
+            self.root, "d:entry", attribs
         )
 
         html_page = self.generate_page(page)
 
         for element in ElementTree.fromstring(html_page):
-                xml_page.append(element)
+            xml_page.append(element)
 
     def generate_entry(self, page: Entry):
         # If this is a kanji entry, and the kanji doesn't appear in the full dictionary
         # then add an index and make it searchable
-        if type(page) == KanjiEntry and self.has_full_entry:
+        if isinstance(page, KanjiEntry) and self.has_full_entry(page):
             self._generate_kanji_entry(page)
         else:
             self._generate_full_entry(page)

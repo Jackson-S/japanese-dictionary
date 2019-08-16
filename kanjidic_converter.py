@@ -1,23 +1,21 @@
 import argparse
-
 import xml.etree.ElementTree as ElementTree
 
-from typing import Union, List
-
-"""
-Parses the Kanjidic2.xml file format, and can output a series of dictionary entries as html files
-"""
+from typing import List
+from dataclasses import dataclass
 
 
+@dataclass
 class Reading:
-    def __init__(self, reading: str, type: str):
+    def __init__(self, reading: str, reading_type: str):
         # The reading in hirigana
         self.reading: str = reading
 
         # The type of reading ("on"|"kun"|"nan") = (On-Yomi | Kun-Yomi | Nanori)
-        self.type: str = type
+        self.type: str = reading_type
 
 
+@dataclass
 class Definition:
     def __init__(self, index: int, translations: List[str]):
         # The index of the definition
@@ -52,16 +50,16 @@ class KanjiEntry:
         # Generate a reference for the page. This will be the page's unique ID in the future.
         self.reference: str = "jp_kanji_{}".format(self.page_title)
 
-    def add_reading(self, reading: str, type: str) -> None:
+    def add_reading(self, reading: str, reading_type: str) -> None:
         # Determine the reading type
-        if type == "on":
+        if reading_type == "on":
             self.on_yomi.append(reading)
-        elif type == "kun":
+        elif reading_type == "kun":
             self.kun_yomi.append(reading)
-        elif type == "nan":
+        elif reading_type == "nan":
             self.nanori.append(reading)
         else:
-            raise ValueError("Expected on or kun, got {}".format(type))
+            raise ValueError("Expected on or kun, got {}".format(reading_type))
 
     def add_definition(self, index: int, translations: List[str]) -> None:
         definition = Definition(index, translations)
@@ -79,8 +77,7 @@ class KanjiEntry:
     def _read_tag(self, tag: ElementTree.Element):
         # Check that the tag is of the correct type to be parsed
         if tag.tag != "character":
-            error = "Input tag is of type {} expected 'character'".format(
-                self.tag.tag)
+            error = "Input tag is of type {} expected 'character'".format(tag.tag)
             raise ValueError(error)
 
         # Get the page title
@@ -119,7 +116,7 @@ class KanjiEntry:
                 break
 
 
-def append_tag(parent: ElementTree.Element, tag_name: str, text=None, attribs={}) -> ElementTree.Element:
+def append_tag(parent: ElementTree.Element, tag_name: str, text=None, attribs=None) -> ElementTree.Element:
     tag = ElementTree.SubElement(parent, tag_name)
     if text:
         tag.text = text

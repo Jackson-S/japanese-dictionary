@@ -1,14 +1,10 @@
 import argparse
-
 import xml.etree.ElementTree as ElementTree
 
-from typing import Union, List, Optional
+from typing import List, Tuple
 
-"""
-Parses the JMdict.xml or JMdict_e.xml file format, and can output a series of dictionary entries as html files
-"""
 
-classifications = {
+CLASSIFICATIONS = {
     "noun or verb acting prenominally": "Prenominal Noun",
     "pre-noun adjectival (rentaishi)": "Pre-noun Adjective",
     "adjective (keiyoushi)": "Adjective",
@@ -76,10 +72,10 @@ class Definition:
         self.part_of_speech: List[str] = [self.simplify(x) for x in pos]
 
     def simplify(self, pos: str):
-        if pos not in classifications:
+        if pos not in CLASSIFICATIONS:
             raise ValueError(
                 "Got Part of Speech '{}', which is not in list".format(pos))
-        return classifications[pos]
+        return CLASSIFICATIONS[pos]
 
 
 class Kanji:
@@ -129,37 +125,53 @@ class DictionaryEntry:
             return self.kanji_elements[0].kanji
         return self.reading_elements[0].reading
 
-    def check_tag_type(self, tag: ElementTree.Element, type: str):
-        if tag.tag != type:
+    def _check_tag_type(self, tag: ElementTree.Element, is_type: str):
+        if tag.tag != is_type:
             raise ValueError(
-                "Tag of type {} expected, got {}".format(type, tag.tag))
+                "Tag of type {} expected, got {}".format(is_type, tag.tag))
+
+    def _read_tag(self, tag: ElementTree.Element):
+        self._check_tag_type(tag, "entry")
+
+        for reading in tag.findall("r_ele"):
+            self.add_reading(reading)
+
+        for kanji in tag.findall("k_ele"):
+            self.add_kanji(kanji)
+
+        last_pos = tuple()
+        for definition in tag.findall("sense"):
+            this_pos = tuple(x.text for x in definition.findall("pos"))
+            if this_pos != tuple():
+                last_pos = this_pos
+            self.add_definition(definition, last_pos)
 
     def add_kanji(self, tag: ElementTree.Element):
-        self.check_tag_type(tag, "k_ele")
+        self._check_tag_type(tag, "k_ele")
 
         # Check if we want the kanji in the dictionary
-        for inf in tag.findall("ke_inf"):
-            if inf.text == "word containing out-dated kanji":
-                return
+        if any(map(lambda x: "out-dated" in x.text, tag.findall("ke_inf"))):
+            return
 
         # Insert the kanji into the dictionary
         name = tag.find("keb").text
         info = [x.text for x in tag.findall("ke_inf")]
 
-        self.kanji_elements.append(Kanji(name, info))
+        new_kanji = Kanji(name, info)
+        self.kanji_elements.append(new_kanji)
 
     def add_reading(self, tag: ElementTree.Element):
-        self.check_tag_type(tag, "r_ele")
+        self._check_tag_type(tag, "r_ele")
+
+        inf_ignores = {"old", "out-dated"}
 
         # Ignore obscute or obsolote readings
         for inf in tag.findall("re_inf"):
-            if inf.text == "old or irregular kana form":
-                return
-            if inf.text == "out-dated or obsolete kana usage":
+            if any(map(lambda x: x in inf.text, inf_ignores)):
                 return
 
         # Ignore restricted readings
-        for restr in tag.findall("re_restr"):
+        if tag.find("re_restr"):
             return
 
         name = tag.find("reb").text
@@ -168,63 +180,37 @@ class DictionaryEntry:
         if tag.find("re_nokanji"):
             info.append("Reference Only")
 
-        self.reading_elements.append(Reading(name, info))
+        new_reading = Reading(name, info)
+        self.reading_elements.append(new_reading)
 
-    def add_definition(self, tag: ElementTree.Element, last_pos: List[str]):
-        self.check_tag_type(tag, "sense")
+    def add_definition(self, tag: ElementTree.Element, parts_of_speech: Tuple[str]):
+        self._check_tag_type(tag, "sense")
 
-        # Ignore
+        misc_ignores = {"abbreviation", "obsolete term", "obscure term", "rare"}
+        pos_ignores = {"archaic", "taru", "precursor"}
+
         for misc in tag.findall("misc"):
-            if misc.text == "abbreviation":
-                return
-            if misc.text == "obsolete term":
-                return
-            if misc.text == "obscure term":
-                return
-            if misc.text == "rare":
-                return
-            if misc.text == "abbreviation":
+            if any(map(lambda x: x in misc.text, misc_ignores)):
                 return
 
-        for pos in last_pos:
-            if "archaic" in pos:
-                return
-            if "taru" in pos:
-                return
-            if "precursor" in pos:
+        for pos in parts_of_speech:
+            if any(map(lambda x: x in pos, pos_ignores)):
                 return
 
-        for x_ref in tag.findall("xref"):
+        if tag.find("xref"):
             return
 
-        translations = [x.text for x in tag.findall(
-            "gloss") if x.attrib["{http://www.w3.org/XML/1998/namespace}lang"] == "eng"]
+        lang_tag = "{http://www.w3.org/XML/1998/namespace}lang"
+        translations = filter(lambda x: x.attrib[lang_tag] == "eng", tag.findall("gloss"))
+        translations = list(map(lambda x: x.text, translations))
 
-        if len(translations) != 0:
-            self.definitions.append(Definition(
-                len(self.definitions) + 1, translations, last_pos))
-
-    def _read_tag(self, tag: ElementTree.Element):
-        if tag.tag != "entry":
-            raise ValueError(
-                "Tag of type Entry expected, got {}".format(tag.tag))
-
-        for reading in tag.findall("r_ele"):
-            self.add_reading(reading)
-
-        for kanji in tag.findall("k_ele"):
-            self.add_kanji(kanji)
-
-        last_pos = []
-        for definition in tag.findall("sense"):
-            this_pos = [x.text for x in definition.findall("pos")]
-            if this_pos != [] and last_pos != this_pos:
-                last_pos = this_pos
-            if not any(map(lambda x: "(archaic)" in x, last_pos)):
-                self.add_definition(definition, last_pos)
+        if translations:
+            new_index = len(self.definitions) + 1
+            new_definition = Definition(new_index, translations, parts_of_speech)
+            self.definitions.append(new_definition)
 
 
-def append_tag(parent: ElementTree.Element, tag_name: str, text=None, attribs={}) -> ElementTree.Element:
+def append_tag(parent: ElementTree.Element, tag_name: str, text=None, attribs=None) -> ElementTree.Element:
     tag = ElementTree.SubElement(parent, tag_name)
     if text:
         tag.text = text
