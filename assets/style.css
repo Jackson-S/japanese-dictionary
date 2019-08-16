@@ -193,6 +193,10 @@ summary:focus {
  * They are all prefaced with html.apple_client-panel.
  */
 /* Hide subheader and badges to reduce onscreen elements */
+html.apple_client-panel * {
+  font-family: sans-serif;
+}
+
 html.apple_client-panel #sub_header,
 html.apple_client-panel .badge,
 html.apple_client-panel .section_heading {
@@ -202,6 +206,7 @@ html.apple_client-panel .section_heading {
 /* Set the title font to be small */
 html.apple_client-panel #page_title {
   font-size: small;
+  margin: 0;
 }
 
 /* Remove background colouring and replace with a border element */
