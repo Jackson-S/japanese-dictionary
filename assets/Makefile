@@ -14,8 +14,8 @@ CSS_PATH		=	JapaneseDictionary.css
 PLIST_PATH		=	JapaneseDictionary.plist
 IMAGE_PATH		=	"OtherResources/Images"
 
-# Uncomment -v 10.6 to enable optimisation
-DICT_BUILD_OPTS		=	# -v 10.6
+# Uncomment -v 10.11 to enable optimisation
+DICT_BUILD_OPTS		=	-v 10.11 -t 3
 # Suppress adding supplementary key.
 # DICT_BUILD_OPTS		=	-s 0	# Suppress adding supplementary key.
 
