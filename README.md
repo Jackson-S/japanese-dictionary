@@ -4,8 +4,8 @@
 > Clean UI that adapts to context
   ![](screenshots/layouts.png)
 
-### Features Aimed at Japanese Learners
-> ![](screenshots/features.png)
+> Features Aimed at Japanese Learners
+  ![](screenshots/features.png)
   Stroke order, example sentences and English -> Japanese lookup.
 
 Note: English -> Japanese lookup is a work in progress and may not be entirely reliable or accurate.</p>
