@@ -1,27 +1,16 @@
 # Japanese-English Dictionary
-## Features
 
-### Clean UI that adapts to context
-<div style="display:grid;grid-template-columns:repeat(3,1fr);text-align:center;">
-    <img src="screenshots/definition.png" />
-    <img src="screenshots/popover.png" />
-    <img src="screenshots/spotlight.png" />
-    <p>Dictionary App</p>
-    <p>Look Up</p>
-    <p>Spotlight Search</p>
-</div>
+## Features
+> Clean UI that adapts to context
+  ![](screenshots/layouts.png)
 
 ### Features Aimed at Japanese Learners
-<div style="display:grid;grid-template-columns:repeat(3,1fr);text-align:center;">
-    <img src="screenshots/stroke_order.png" />
-    <img src="screenshots/sentence.png" />
-    <img src="screenshots/english.png">
-    <p>Kanji stroke order</p>
-    <p>Example sentences</p>
-    <p>English -> Japanese lookup</p>
-</div>
-<p style="grid-column:span 3;font-size:0.7em;margin:0;">English -> Japanese lookup is a work in progress and may not be entirely reliable or accurate.</p>
+> ![](screenshots/features.png)
+  Stroke order, example sentences and English -> Japanese lookup.
 
+Note: English -> Japanese lookup is a work in progress and may not be entirely reliable or accurate.</p>
+
+## Data Sources
 The dictionary is based on JMDict, KanjiDic2, Tatoeba example sentences, KanjiVG stroke order diagrams. All licensing information can be found below.
 
 ## Compiling
