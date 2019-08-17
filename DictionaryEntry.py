@@ -68,9 +68,10 @@ class Reading:
 
 @dataclass
 class Definition:
-    def __init__(self, pos: List[str], translations: List[str]):
+    def __init__(self, pos: List[str], translations: List[str], information: List[str]):
         self.pos: List[str] = pos
         self.translations: List[str] = translations
+        self.information: List[str] = information
 
 
 @dataclass
@@ -111,10 +112,12 @@ class DictionaryEntry(Entry):
 
         self.definitions: List[Definition] = []
         for definition in entry.find("definitions").findall("definition"):
-            pos = [x.text for x in definition.findall("pos")]
             translations = [x.text for x in definition.findall("translation")]
-            if len(translations) > 0:
-                self.definitions.append(Definition(pos, translations))
+            info = [x.text for x in definition.findall("info")]
+            pos = [x.text for x in definition.findall("pos")]
+            if translations:
+                new_definition = Definition(pos, translations, info)
+                self.definitions.append(new_definition)
 
     def get_containing_kanji(self, kanji_set: Set[str]) -> List[str]:
         result = []

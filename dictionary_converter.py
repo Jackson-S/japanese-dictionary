@@ -62,7 +62,7 @@ CLASSIFICATIONS = {
 
 
 class Definition:
-    def __init__(self, index: int, translations: List[str], pos: List[str]):
+    def __init__(self, index: int, translations: List[str], pos: List[str], info: List[str]):
         # The index of the definition
         self.index: int = index
 
@@ -70,6 +70,8 @@ class Definition:
         self.translations: List[str] = translations
 
         self.part_of_speech: List[str] = [self.simplify(x) for x in pos]
+
+        self.information: List[str] = info
 
     def simplify(self, pos: str):
         if pos not in CLASSIFICATIONS:
@@ -204,9 +206,11 @@ class DictionaryEntry:
         translations = filter(lambda x: x.attrib[lang_tag] == "eng", tag.findall("gloss"))
         translations = list(map(lambda x: x.text, translations))
 
+        info = [x.text for x in tag.findall("s_inf")]
+
         if translations:
             new_index = len(self.definitions) + 1
-            new_definition = Definition(new_index, translations, parts_of_speech)
+            new_definition = Definition(new_index, translations, parts_of_speech, info)
             self.definitions.append(new_definition)
 
 
@@ -264,6 +268,9 @@ def main():
 
             for translation in definition.translations:
                 append_tag(definition_tag, "translation", translation)
+
+            for info in definition.information:
+                append_tag(definition_tag, "info", info)
 
     tree = ElementTree.ElementTree(root)
     tree.write("output/dictionary.xml", "UTF-8", True)

@@ -41,25 +41,6 @@ summary:focus {
 }
 /* End Element Styles */
 
-/* ID styles */
-#sub_header {
-  display: grid;
-  grid-gap: 10px;
-}
-
-#sub_header > details, 
-#sub_header > section {
-  background-color: rgb(230,230,230);
-  padding: 10px;
-  border-radius: 5px;
-}
-
-#sub_header > #readings {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-}
-/* End ID styles */
-
 /* Class styles */
 .section_heading {
   cursor: default;
@@ -89,9 +70,39 @@ summary:focus {
   border-radius: 5px;
   font-size: 80%;
 }
+
+.translation_info {
+  grid-column: 2;
+  display: flex;
+}
+
+.translation_info p {
+  padding-right: 5px;
+}
 /* End class styles */
 
-/* Sub-element styles */
+/* ID styles */
+#header > h1 {
+  display: inline-block;
+}
+
+#sub_header {
+  display: grid;
+  grid-gap: 10px;
+}
+
+#sub_header > details, 
+#sub_header > section {
+  background-color: rgb(230,230,230);
+  padding: 10px;
+  border-radius: 5px;
+}
+
+#sub_header > #readings {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
 #sub_header > #nanori > p {
   display: inline-block;
 }
@@ -131,7 +142,7 @@ summary:focus {
 }
 
 #definitions > article {
-  grid-template-columns: min-content 1fr auto;
+  grid-template-columns: min-content 1fr min-content;
 }
 
 #english_translations > article {
@@ -143,9 +154,16 @@ summary:focus {
   border-bottom: none;
 }
 
+#definitions .translation_line,
+#english_translations .translation_line {
+  align-self: center;
+}
+
 #definitions .translation_line > p, 
 #english_translations .translation_line > p {
-  display: inline-block;
+  display: inline;
+  white-space: normal;
+  width: 100%;
   margin-right: 5px;
 }
 
@@ -170,7 +188,7 @@ summary:focus {
   font-size: larger;
   margin-right: 5px;
 }
-/* End sub-element styles */
+/* End ID styles */
 
 /* Dark mode style */
 @media (prefers-dark-interface)
@@ -187,7 +205,8 @@ summary:focus {
 }
 /* End dark mode style */
 
-/* Popup styles - All prefaced with html.apple_client-panel
+/* Popup styles
+ * All prefaced with html.apple_client-panel
  * These styles apply to the popup definition box that appears
  * on a three finger tap or force touch on a word.
  *
@@ -200,12 +219,13 @@ html.apple_client-panel * {
 
 html.apple_client-panel #sub_header,
 html.apple_client-panel .badge,
-html.apple_client-panel .section_heading {
+html.apple_client-panel .section_heading,
+html.apple_client-panel .translation_info {
   display: none;
 }
 
 /* Set the title font to be small */
-html.apple_client-panel #page_title {
+html.apple_client-panel #header h1 {
   font-size: small;
   margin: 0;
 }
@@ -232,3 +252,23 @@ html.apple_client-panel #english_translations .number {
   font-size: 10px;
 }
 /* End popup style */
+
+/* Spotlight Style 
+ * The apple_client-spotlight class is applied using Javascript on the 
+ * entry page, as there is not normally a way of differentiating between 
+ * them using only CSS easily.
+ */
+html.apple_client-spotlight * {
+  font-family: sans-serif;
+}
+
+/* Remove the margin from the header */
+html.apple_client-spotlight #header h1 {
+  margin: 0;
+}
+
+/* Hide the subheader information */
+html.apple_client-spotlight #sub_header {
+  display: none;
+}
+/* End spotlight style */

@@ -1,12 +1,15 @@
 <body>
     <section id="header">
         <h1 id="page_title">{{ entry.page_title }}</h1>
+        {% if entry.readings | count == 1 %}
+        <h1 id="primary_reading">【{{ entry.readings[0].text }}】</h1>
+        {% endif %}
     </section>
 
     <section id="sub_header">
-        {% if entry.readings | count > 0 or entry.kanji | count > 1 %}
+        {% if entry.readings | count > 1 or entry.kanji | count > 1 %}
         <section id="readings">
-            {% if entry.readings | count > 0 %}
+            {% if entry.readings | count > 1 %}
             <section id="onyomi">
                 <h3 class="section_heading" apple_mouseover_disable="1">Readings</h3>
                 {% for reading in entry.readings %}
@@ -77,7 +80,16 @@
                 <div class="badge">{{ pos }}</div>
                 {% endfor %}
             </div>
+            {% if definition.information != [] %}
+            <div class="translation_info">
+                <p>↳</p>
+                {% for info in definition.information %}
+                <p>{{ info }}</p>
+                {% endfor %}
+            </div>
+            {% endif %}
         </article>
         {% endfor %}
     </section>
+    <script>var html=document.getElementsByTagName("html")[0];var classes=html.className.split(" ");if(classes.indexOf("apple_client-application")!=-1){if(classes.indexOf("apple_display-separateview")==-1){html.classList.add("apple_client-spotlight")}}</script>
 </body>
