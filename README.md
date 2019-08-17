@@ -1,38 +1,58 @@
-# Japanese Dictionary for MacOS
-A Japanese -> English dictionary for the Dictionary app in MacOS based off JMdict, Kanjidic2 and KanjiVG
+# Japanese-English Dictionary
+## Features
 
-![](/screenshots/a.png)
-![](/screenshots/b.png)
+### Clean UI that adapts to context
+<div style="display:grid;grid-template-columns:repeat(3,1fr);text-align:center;">
+    <img src="screenshots/definition.png" />
+    <img src="screenshots/popover.png" />
+    <img src="screenshots/spotlight.png" />
+    <p>Dictionary App</p>
+    <p>Look Up</p>
+    <p>Spotlight Search</p>
+</div>
 
-<p>
-This package uses the 
-<a href="http://www.csse.monash.edu.au/~jwb/edict.html">EDICT</a> and
-<a href="http://www.csse.monash.edu.au/~jwb/kanjidic.html">KANJIDIC</a> dictionary files.
-These files are the property of the 
-<a href="http://www.edrdg.org/"> Electronic Dictionary 
-Research and Development Group</a>, and are used in
-conformance with the Group's 
-<a href="http://www.edrdg.org/edrdg/licence.html">licence</a>.
-</p>
-<p>
-The example sentences in this dictionary are provided by 
-<a href="https://tatoeba.org/eng/downloads">Tatoeba.org</a>
-under the 
-<a href="https://creativecommons.org/licenses/by/2.0/fr/">Creative Common Attribution 2.0 France</a>
-(CC BY 2.0 FR) license.
-</p>
-<p>
-The kanji samples in this dictionary are provided by
-<a href="https://kanjivg.tagaini.net/">KanjiVG</a>
-under the
-<a href="https://creativecommons.org/licenses/by-sa/3.0/">Creative Common Attribution-ShareAlike 3.0 Unported</a>
-(CC BY-SA 3.0) license and are copyright © 2009-2018 Ulrich Apel.
-</p>
-<p>
-The english entries in this dictionary are filtered using text data from Wiktionary,
-which is released under the 
-<a href="https://www.wikipedia.org/wiki/Wikipedia:Copyrights">GNU Free Documentation License (GFDL)</a> 
-and the 
-<a href="https://creativecommons.org/licenses/by-sa/3.0/">Creative Commons Attribution-Share-Alike 3.0</a> 
-License.
-</p>
+### Features Aimed at Japanese Learners
+<div style="display:grid;grid-template-columns:repeat(3,1fr);text-align:center;">
+    <img src="screenshots/stroke_order.png" />
+    <img src="screenshots/sentence.png" />
+    <img src="screenshots/english.png">
+    <p>Kanji stroke order</p>
+    <p>Example sentences</p>
+    <p>English -> Japanese lookup</p>
+</div>
+<p style="grid-column:span 3;font-size:0.7em;margin:0;">English -> Japanese lookup is a work in progress and may not be entirely reliable or accurate.</p>
+
+The dictionary is based on JMDict, KanjiDic2, Tatoeba example sentences, KanjiVG stroke order diagrams. All licensing information can be found below.
+
+## Compiling
+Compiling requires ~6GB of free ram.
+To compile the dictionary there are a number of requirements:
+ - Apple dictionary development kit
+ - Python 3.7+ with pip requirements:
+    - jinja2
+    - mecab-python3
+    - jaconv
+ - XZip
+ - XMLLint
+ - MeCab
+
+To compile run
+> $./compile.sh
+
+or to compile a sample dictionary containing a small subset of words
+> $./compile_sample.sh
+
+useful for testing as the full version can take up to an hour to compile
+
+## Copyright and Usage Information
+### EDICT and KanjiDic
+This package uses the [EDICT](http://www.csse.monash.edu.au/~jwb/edict.html) and [KANJIDIC](http://www.csse.monash.edu.au/~jwb/kanjidic.html) dictionary files. These files are the property of the [Electronic Dictionary Research and Development Group](http://www.edrdg.org/), and are used in conformance with the Group's [licence](http://www.edrdg.org/edrdg/licence.html).
+
+### Tatoeba
+The example sentences in this dictionary are provided by [Tatoeba.org](https://tatoeba.org/eng/downloads) under the [Creative Common Attribution 2.0 France](https://creativecommons.org/licenses/by/2.0/fr/) (CC BY 2.0 FR) license.
+
+### KanjiVG
+The kanji samples in this dictionary are provided by [KanjiVG](https://kanjivg.tagaini.net/) under the [Creative Common Attribution-ShareAlike 3.0 Unported](https://creativecommons.org/licenses/by-sa/3.0/) (CC BY-SA 3.0) license and are copyright © 2009-2018 Ulrich Apel.
+
+### Wiktionary
+The english entries in this dictionary are filtered using text data from Wiktionary, which is released under the [GNU Free Documentation License (GFDL)](https://www.wikipedia.org/wiki/Wikipedia:Copyrights) and the  [Creative Commons Attribution-Share-Alike 3.0](https://creativecommons.org/licenses/by-sa/3.0/) License.
