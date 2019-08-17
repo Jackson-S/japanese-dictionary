@@ -34,10 +34,10 @@ To compile the dictionary there are a number of requirements:
  - MeCab
 
 To compile run
-> $./compile.sh
+> ./compile.sh
 
 or to compile a sample dictionary containing a small subset of words
-> $./compile_sample.sh
+> ./compile_sample.sh
 
 useful for testing as the full version can take up to an hour to compile
 
