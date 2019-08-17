@@ -4,14 +4,22 @@
 > Clean UI that adapts to context
   ![](screenshots/layouts.png)
 
-### Features Aimed at Japanese Learners
-> ![](screenshots/features.png)
+> Features Aimed at Japanese Learners
+  ![](screenshots/features.png)
   Stroke order, example sentences and English -> Japanese lookup.
 
-Note: English -> Japanese lookup is a work in progress and may not be entirely reliable or accurate.</p>
+Note: English -> Japanese lookup is a work in progress and may not be entirely reliable or accurate.
 
 ## Data Sources
 The dictionary is based on JMDict, KanjiDic2, Tatoeba example sentences, KanjiVG stroke order diagrams. All licensing information can be found below.
+
+## Installing
+1) Open Dictionary.app, go to File > Open Dictionaries Folder.
+2) Place "Japanese English Dictionary.dictionary" directly into the folder that opens.
+3) Restart Dictionary.app
+4) Go to "Dictionary" in the menu bar then "Preferences"
+5) Scroll down to the bottom and tick "Japanese English Dictionary (English-Japanese)
+6) *You might need to restart your computer to enable Spotlight and Lookup.*
 
 ## Compiling
 Compiling requires ~6GB of free ram.
