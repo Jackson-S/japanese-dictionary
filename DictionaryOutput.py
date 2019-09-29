@@ -2,12 +2,12 @@ import xml.etree.ElementTree as ElementTree
 
 from itertools import chain
 from jinja2 import Environment, FileSystemLoader, select_autoescape
-from DictionaryEntry import Entry, DictionaryEntry, EnglishDictionaryEntry, KanjiEntry
+from DictionaryEntry import Entry, JapaneseEntry, EnglishEntry, KanjiEntry
 
 
 class DictionaryOutput:
     def __init__(self, pages):
-        dict_entries = filter(lambda x: isinstance(x, DictionaryEntry), pages.values())
+        dict_entries = filter(lambda x: isinstance(x, JapaneseEntry), pages.values())
         self.full_entries = set(map(lambda x: x.page_title, dict_entries))
 
         self.root: ElementTree.Element = ElementTree.Element(
@@ -26,8 +26,8 @@ class DictionaryOutput:
         )
         self.templates = {
             KanjiEntry: self.environment.get_template("kanji_page.html"),
-            DictionaryEntry: self.environment.get_template("japanese_definition_page.html"),
-            EnglishDictionaryEntry: self.environment.get_template(
+            JapaneseEntry: self.environment.get_template("japanese_definition_page.html"),
+            EnglishEntry: self.environment.get_template(
                 "english_definition_page.html")
         }
 
@@ -52,7 +52,7 @@ class DictionaryOutput:
 
         if isinstance(page, KanjiEntry):
             readings = [x for x in chain(page.on_yomi, page.kun_yomi)]
-        elif isinstance(page, DictionaryEntry):
+        elif isinstance(page, JapaneseEntry):
             readings = [x.text for x in page.readings]
 
         for reading in readings:

@@ -31,6 +31,10 @@ tar -xzf ./assets/kanjivg.tar.xz -C ./build/OtherResources/Images
 echo "Processing sample sentences"
 python3 ./sentence_converter.py ./input/sentences.csv ./input/jpn_indices.csv -o output/sentences.xml
 
+# Convert the similar kanji into a SQL database
+echo "Compiling similar Kanji"
+python3 ./similar_kanji.py
+
 # Convert Kanjidic2.xml into a simplified XML file containing only the needed data
 echo "Processing Kanji"
 python3 ./kanjidic_converter.py ./input/kanjidic2.xml

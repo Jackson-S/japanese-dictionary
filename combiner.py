@@ -4,7 +4,7 @@ import xml.etree.ElementTree as ElementTree
 
 from typing import Set, Dict
 
-from DictionaryEntry import Entry, DictionaryEntry, EnglishDictionaryEntry, KanjiEntry, Sentence
+from DictionaryEntry import Entry, JapaneseEntry, EnglishEntry, KanjiEntry, Sentence
 from DictionaryOutput import DictionaryOutput
 
 def get_stats(pages):
@@ -21,9 +21,9 @@ def get_stats(pages):
             entries["kanji"] += 1
             if entry.image:
                 entries["kanji_image"] += 1
-        elif isinstance(entry, DictionaryEntry):
+        elif isinstance(entry, JapaneseEntry):
             entries["japanese"] += 1
-        elif isinstance(entry, EnglishDictionaryEntry):
+        elif isinstance(entry, EnglishEntry):
             entries["english"] += 1
         else:
             entries["other"] += 1
@@ -64,7 +64,7 @@ def create_kanji_pages(kanji_path: str, kanji_images: Set[str]) -> Dict[str, Kan
     return result
 
 
-def create_japanese_pages(dict_path: str, sentence_path: str, kanji: Set[str]) -> Dict[str, DictionaryEntry]:
+def create_japanese_pages(dict_path: str, sentence_path: str, kanji: Set[str]) -> Dict[str, JapaneseEntry]:
     sentence_tree = ElementTree.parse(sentence_path)
     sentence_root = sentence_tree.getroot()
 
@@ -84,16 +84,16 @@ def create_japanese_pages(dict_path: str, sentence_path: str, kanji: Set[str]) -
     result = dict()
 
     for entry in dictionary_root:
-        new_entry = DictionaryEntry(entry, sentence_index_list, kanji)
+        new_entry = JapaneseEntry(entry, sentence_index_list, kanji)
         if new_entry.is_worth_adding():
             result[new_entry.page_title] = new_entry
 
     return result
 
 
-def create_english_pages(english_wordlist_path: str, japanese_entries: Set[DictionaryEntry]) -> Dict[str, EnglishDictionaryEntry]:
+def create_english_pages(english_wordlist_path: str, japanese_entries: Set[JapaneseEntry]) -> Dict[str, EnglishEntry]:
     english_wordlist = set()
-    result: Dict[str, EnglishDictionaryEntry] = dict()
+    result: Dict[str, EnglishEntry] = dict()
 
     with open(english_wordlist_path) as in_file:
         english_wordlist = set(x.strip() for x in in_file.readlines())
@@ -117,7 +117,7 @@ def create_english_pages(english_wordlist_path: str, japanese_entries: Set[Dicti
                 for word in variant_words:
                     if word in english_wordlist:
                         context = [x for x in definition.translations if x != word]
-                        result.setdefault(word, EnglishDictionaryEntry(word))
+                        result.setdefault(word, EnglishEntry(word))
                         result[word].add_translation(page.page_title, context, definition.pos)
 
     return result
@@ -138,7 +138,7 @@ def main():
 
     pages = {**pages, **create_japanese_pages(args.dictionary, args.sentences, kanji_set)}
 
-    japanese_entries = set(filter(lambda x: isinstance(x, DictionaryEntry), pages.values()))
+    japanese_entries = set(filter(lambda x: isinstance(x, JapaneseEntry), pages.values()))
 
     pages = {**pages, **create_english_pages(args.english_wordlist, japanese_entries)}
 

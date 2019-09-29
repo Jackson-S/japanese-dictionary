@@ -1,4 +1,5 @@
 <body>
+    <script>var html=document.getElementsByTagName("html")[0];var classes=html.className.split(" ");if(classes.indexOf("apple_client-application")!=-1){if(classes.indexOf("apple_display-separateview")==-1){html.classList.add("apple_client-spotlight")}}</script>
     <section id="header">
         <h1 id="page_title">{{ entry.page_title }}</h1>
         {% if entry.readings | count == 1 %}
@@ -91,5 +92,4 @@
         </article>
         {% endfor %}
     </section>
-    <script>var html=document.getElementsByTagName("html")[0];var classes=html.className.split(" ");if(classes.indexOf("apple_client-application")!=-1){if(classes.indexOf("apple_display-separateview")==-1){html.classList.add("apple_client-spotlight")}}</script>
 </body>

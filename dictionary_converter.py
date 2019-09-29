@@ -238,39 +238,29 @@ def main():
     root = ElementTree.Element("dictionary")
 
     for entry in entries:
-        entry_root = ElementTree.SubElement(
-            root, "entry", {"title": entry.title})
-
-        readings_tag = ElementTree.SubElement(entry_root, "readings")
+        entry_root = append_tag(root, "entry", attribs={"title": entry.title})
 
         for reading in entry.reading_elements:
-            reading_tag = ElementTree.SubElement(
-                readings_tag, "reading", {"text": reading.reading})
+            r_tag = append_tag(entry_root, "reading", attribs={"text": reading.reading})
             for info in reading.info:
-                append_tag(reading_tag, "info", info)
-
-        kanjis_tag = ElementTree.SubElement(entry_root, "kanji")
+                append_tag(r_tag, "info", info)
 
         for kanji in entry.kanji_elements:
-            kanji_tag = ElementTree.SubElement(
-                kanjis_tag, "form", {"text": kanji.kanji})
+            k_tag = append_tag(entry_root, "kanji", attribs={"text": kanji.kanji})
             for info in kanji.info:
-                append_tag(kanji_tag, "info", info)
-
-        definitions_tag = ElementTree.SubElement(entry_root, "definitions")
+                append_tag(k_tag, "info", info)
 
         for definition in entry.definitions:
-            definition_tag = ElementTree.SubElement(
-                definitions_tag, "definition")
+            d_tag = append_tag(entry_root, "definition")
 
             for pos in definition.part_of_speech:
-                append_tag(definition_tag, "pos", pos)
+                append_tag(d_tag, "pos", pos)
 
             for translation in definition.translations:
-                append_tag(definition_tag, "translation", translation)
+                append_tag(d_tag, "translation", translation)
 
             for info in definition.information:
-                append_tag(definition_tag, "info", info)
+                append_tag(d_tag, "info", info)
 
     tree = ElementTree.ElementTree(root)
     tree.write("output/dictionary.xml", "UTF-8", True)
