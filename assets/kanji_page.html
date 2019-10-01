@@ -46,8 +46,11 @@
         {% if entry.similar_kanji | count > 0 %}
         <section id="similar_kanji">
             <h3 class="section_heading" apple_mouseover_disable="1">Similar Kanji</h3>
-            {% for kanji in entry.similar_kanji %}
-            <p>{{ kanji }}</p>
+            {% for similar in entry.similar_kanji %}
+            <div class="reading">
+                <a href="x-dictionary:r:jp_kanji_{{ similar[0] }}">{{ similar[0] }}</a>
+                <p>{{ similar[1] }}</p>
+            </div>
             {% endfor %}
         </section>
         {% endif %}

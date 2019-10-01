@@ -190,7 +190,7 @@ class KanjiEntry(Entry):
         self.on_yomi: List[str] = self._get_readings(kanji_entry, "on")
         self.kun_yomi: List[str] = self._get_readings(kanji_entry, "kun")
         self.nanori: List[str] = self._get_readings(kanji_entry, "nanori")
-        self.similar_kanji: List[str] = self._get_similar_kanji(kanji_entry)
+        self.similar_kanji: List[List[str]] = self._get_similar_kanji(kanji_entry)
         self.radicals: List[str] = self._get_radicals(kanji_entry)
         self.definitions: List[List[str]] = self._get_senses(kanji_entry)
 
@@ -211,7 +211,7 @@ class KanjiEntry(Entry):
     def _get_similar_kanji(self, tag: ElementTree.Element) -> List[str]:
         result = []
         for kanji in tag.findall("similar_kanji"):
-            result.append(kanji.attrib["kanji"])
+            result.append([kanji.attrib["kanji"], kanji.attrib["meaning"]])
         return result
 
     def _get_senses(self, tag: ElementTree.Element) -> List[List[str]]:

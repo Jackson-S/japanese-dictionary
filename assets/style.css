@@ -184,11 +184,17 @@ summary:focus {
   overflow-x: hidden;
 }
 
-#containing_kanji a {
+#containing_kanji a, 
+#similar_kanji a {
   color: black;
-  font-size: larger;
   margin-right: 5px;
+  text-decoration: none;
 }
+
+#similar_kanji .reading * {
+  display: inline;
+}
+
 /* End ID styles */
 
 /* Dark mode style */

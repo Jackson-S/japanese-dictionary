@@ -40,7 +40,7 @@ class KanjiEntry:
         self.definitions: List[Definition] = []
 
         # List of similar kanji according to stroke order or radicals
-        self.similar_kanji: List[str] = []
+        self.similar_kanji: List[List[str]] = []
 
         self._read_tag(kanjidic2_tag)
 
@@ -114,10 +114,10 @@ class KanjiEntry:
 
         global similar_db
         cursor = similar_db.cursor()
-        search = cursor.execute("SELECT similar_character FROM Similarity WHERE primary_character=? AND similarity > 0.7", (self.page_title, ))
+        search = cursor.execute("SELECT similar, meaning FROM Similarity WHERE root=? AND similarity > 0.7", (self.page_title, ))
         results = search.fetchall()
         for result in results:
-            self.similar_kanji.append(result[0])
+            self.similar_kanji.append(result)
 
 def append_tag(parent: ElementTree.Element, tag_name: str, text=None, attr=None) -> ElementTree.Element:
     tag = ElementTree.SubElement(parent, tag_name)
@@ -165,8 +165,8 @@ def main():
             for reading in entry.nanori:
                 append_tag(entry_root, "reading", attr={"type": "nanori", "text": reading})
             
-            for kanji in entry.similar_kanji:
-                append_tag(entry_root, "similar_kanji", attr={"kanji": kanji})
+            for similar in entry.similar_kanji:
+                append_tag(entry_root, "similar_kanji", attr={"kanji": similar[0], "meaning": similar[1]})
 
             for definition_group in entry.definitions:
                 sense = ElementTree.SubElement(entry_root, "sense")
