@@ -87,9 +87,9 @@ class Reading:
 
 
 class JapaneseEntry(Entry):
-    def __init__(self, entry: ElementTree.Element, sentences: Dict[str, Sentence], kanji_set: Set[str]):
+    def __init__(self, entry: ElementTree.Element, sentences: Dict[str, Sentence]):
         super().__init__(entry.attrib["title"], "jp", "dictionary")
-        self.containing_kanji: List[str] = self._get_containing_kanji(kanji_set)
+        self.containing_kanji: List[str] = self._get_containing_kanji(entry)
         self.sentences: List[Sentence] = self._get_sentences(sentences)
         self.readings: List[Reading] = self._get_readings(entry)
         self.kanji: List[Reading] = self._get_kanji(entry)
@@ -126,8 +126,13 @@ class JapaneseEntry(Entry):
         result.sort(key=lambda x: int(x.sense_indices.get(self.page_title, 1000)))
         return result
 
-    def _get_containing_kanji(self, kanji: Set[str]) -> List[str]:
-        return [x for x in self.page_title if x in kanji]
+    def _get_containing_kanji(self, tag: ElementTree.Element) -> List[str]:
+        result = []
+        for reading in tag.findall("containing_kanji"):
+            kanji = reading.attrib["text"]
+            meaning = reading.attrib["meaning"]
+            result.append([kanji, meaning])
+        return result
 
     def is_worth_adding(self) -> bool:
         return bool(self.definitions)

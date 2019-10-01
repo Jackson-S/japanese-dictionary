@@ -35,7 +35,7 @@ mkdir output
 echo "Processing sample sentences"
 python3 ./sentence_converter.py ./input/sentences.csv ./input/jpn_indices.csv -o output/sentences.xml
 echo "Compiling similar Kanji"
-python3 ./similar_kanji.py
+python3 ./kanji_relation_db.py
 echo "Processing Kanji"
 python3 ./kanjidic_converter.py ./input/kanjidic2_sample.xml
 echo "Processing Dictionary"

@@ -33,7 +33,7 @@ python3 ./sentence_converter.py ./input/sentences.csv ./input/jpn_indices.csv -o
 
 # Convert the similar kanji into a SQL database
 echo "Compiling similar Kanji"
-python3 ./similar_kanji.py
+python3 ./kanji_relation_db.py
 
 # Convert Kanjidic2.xml into a simplified XML file containing only the needed data
 echo "Processing Kanji"
