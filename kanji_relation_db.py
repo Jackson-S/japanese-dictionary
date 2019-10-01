@@ -2,7 +2,7 @@ import csv
 import sqlite3
 from xml.etree import ElementTree
 
-db = sqlite3.connect("output/kanji.db")
+db = sqlite3.connect("output/dictionary.db")
 cursor = db.cursor()
 
 cursor.execute("""
