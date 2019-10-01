@@ -221,7 +221,7 @@ class DictionaryEntry:
     def add_containing_kanji(self) -> List[List[str]]:
         result = []
         global cursor
-        for character in self.title:
+        for character in set(self.title):
             query = cursor.execute("SELECT character, meaning FROM Kanji WHERE character=?", (character, ))
             query_result = query.fetchone()
             if query_result:
