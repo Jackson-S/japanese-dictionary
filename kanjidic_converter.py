@@ -5,7 +5,7 @@ import xml.etree.ElementTree as ElementTree
 from typing import List
 from dataclasses import dataclass
 
-similar_db = sqlite3.connect("output/similar_kanji.db")
+similar_db = sqlite3.connect("output/kanji.db")
 
 @dataclass
 class Reading:
@@ -114,7 +114,7 @@ class KanjiEntry:
 
         global similar_db
         cursor = similar_db.cursor()
-        search = cursor.execute("SELECT similar, meaning FROM Similarity WHERE root=? AND similarity > 0.7", (self.page_title, ))
+        search = cursor.execute("SELECT similar, meaning FROM Similarity JOIN Kanji ON (similar=character) WHERE root=? AND similarity > 0.7", (self.page_title, ))
         results = search.fetchall()
         for result in results:
             self.similar_kanji.append(result)

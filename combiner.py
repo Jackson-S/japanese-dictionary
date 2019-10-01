@@ -64,7 +64,7 @@ def create_kanji_pages(kanji_path: str, kanji_images: Set[str]) -> Dict[str, Kan
     return result
 
 
-def create_japanese_pages(dict_path: str, sentence_path: str, kanji: Set[str]) -> Dict[str, JapaneseEntry]:
+def create_japanese_pages(dict_path: str, sentence_path: str) -> Dict[str, JapaneseEntry]:
     sentence_tree = ElementTree.parse(sentence_path)
     sentence_root = sentence_tree.getroot()
 
@@ -84,7 +84,7 @@ def create_japanese_pages(dict_path: str, sentence_path: str, kanji: Set[str]) -
     result = dict()
 
     for entry in dictionary_root:
-        new_entry = JapaneseEntry(entry, sentence_index_list, kanji)
+        new_entry = JapaneseEntry(entry, sentence_index_list)
         if new_entry.is_worth_adding():
             result[new_entry.page_title] = new_entry
 
@@ -133,10 +133,7 @@ def main():
 
     pages = {**pages, **create_kanji_pages(args.kanji, image_set)}
 
-    # Create a set of kanji-only pages
-    kanji_set = set(x.page_title for x in pages.values())
-
-    pages = {**pages, **create_japanese_pages(args.dictionary, args.sentences, kanji_set)}
+    pages = {**pages, **create_japanese_pages(args.dictionary, args.sentences)}
 
     japanese_entries = set(filter(lambda x: isinstance(x, JapaneseEntry), pages.values()))
 

@@ -191,6 +191,7 @@ summary:focus {
   text-decoration: none;
 }
 
+#containing_kanji .reading *, 
 #similar_kanji .reading * {
   display: inline;
 }

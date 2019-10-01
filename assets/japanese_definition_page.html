@@ -44,7 +44,10 @@
         <section id="containing_kanji">
             <h3 class="section_heading" apple_mouseover_disable="1">Kanji in this Term</h3>
             {% for kanji in entry.containing_kanji %}
-            <a href="x-dictionary:r:jp_kanji_{{ kanji }}">{{ kanji }}</a>
+            <div class="reading">
+                <a href="x-dictionary:r:jp_kanji_{{ kanji[0] }}">{{ kanji[0] }}</a>
+                <p>{{ kanji[1] }}</p>
+            </div>
             {% endfor %}
         </section>
         {% endif %}

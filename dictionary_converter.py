@@ -1,8 +1,11 @@
 import argparse
+import sqlite3
 import xml.etree.ElementTree as ElementTree
 
 from typing import List, Tuple
 
+db = sqlite3.connect("output/kanji.db")
+cursor = db.cursor()
 
 CLASSIFICATIONS = {
     "noun or verb acting prenominally": "Prenominal Noun",
@@ -122,6 +125,8 @@ class DictionaryEntry:
 
         self.title: str = self.get_title()
 
+        self.containing_kanji: List[List[str]] = self.add_containing_kanji()
+
     def get_title(self) -> str:
         if self.kanji_elements != []:
             return self.kanji_elements[0].kanji
@@ -213,6 +218,16 @@ class DictionaryEntry:
             new_definition = Definition(new_index, translations, parts_of_speech, info)
             self.definitions.append(new_definition)
 
+    def add_containing_kanji(self) -> List[List[str]]:
+        result = []
+        global cursor
+        for character in set(self.title):
+            query = cursor.execute("SELECT character, meaning FROM Kanji WHERE character=?", (character, ))
+            query_result = query.fetchone()
+            if query_result:
+                result.append(list(query_result))
+        return result
+
 
 def append_tag(parent: ElementTree.Element, tag_name: str, text=None, attribs=None) -> ElementTree.Element:
     tag = ElementTree.SubElement(parent, tag_name)
@@ -249,6 +264,9 @@ def main():
             k_tag = append_tag(entry_root, "kanji", attribs={"text": kanji.kanji})
             for info in kanji.info:
                 append_tag(k_tag, "info", info)
+        
+        for kanji in entry.containing_kanji:
+            ck_tag = append_tag(entry_root, "containing_kanji", attribs={"text": kanji[0], "meaning": kanji[1]})
 
         for definition in entry.definitions:
             d_tag = append_tag(entry_root, "definition")
