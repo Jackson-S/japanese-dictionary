@@ -29,7 +29,7 @@ tar -xzf ./assets/kanjivg.tar.xz -C ./build/OtherResources/Images
 
 # Convert the sample sentences into a new, simplified XML file containing only needed data
 echo "Processing sample sentences"
-python3 ./sentence_converter.py ./input/sentences.csv ./input/jpn_indices.csv -o output/sentences.xml
+python3 ./sentence_converter.py ./input/sentences.csv ./input/jpn_indices.csv -o output/dictionary.db
 
 # Convert the similar kanji into a SQL database
 echo "Compiling similar Kanji"
@@ -45,7 +45,7 @@ python3 ./dictionary_converter.py ./input/JMdict_e.xml
 
 # Combine the simplified XML files into the output Apple Dictionary XML file.
 echo "Combining processed files"
-python3 ./combiner.py ./output/dictionary.xml ./output/kanji.xml ./output/sentences.xml ./input/english.txt -o ./build/JapaneseDictionary.xml
+python3 ./combiner.py ./output/dictionary.xml ./output/kanji.xml ./input/english.txt -o ./build/JapaneseDictionary.xml
 
 # Traverse to the output directory in preparation to build
 echo "Building dictionary (This will take a long time, i.e. 10+ minutes"

@@ -33,7 +33,7 @@ tar -xzf ./assets/kanjivg.tar.xz -C ./build/OtherResources/Images
 mkdir output
 
 echo "Processing sample sentences"
-python3 ./sentence_converter.py ./input/sentences.csv ./input/jpn_indices.csv -o output/sentences.xml
+python3 ./sentence_converter.py ./input/sentences.csv ./input/jpn_indices.csv -o output/dictionary.db
 echo "Compiling similar Kanji"
 python3 ./kanji_relation_db.py
 echo "Processing Kanji"
@@ -41,7 +41,7 @@ python3 ./kanjidic_converter.py ./input/kanjidic2_sample.xml
 echo "Processing Dictionary"
 python3 ./dictionary_converter.py ./input/JMdict_e_sample.xml
 echo "Combining processed files"
-python3 ./combiner.py ./output/dictionary.xml ./output/kanji.xml ./output/sentences.xml ./input/english.txt -o ./build/JapaneseDictionary.xml
+python3 ./combiner.py ./output/dictionary.xml ./output/kanji.xml ./input/english.txt -o ./build/JapaneseDictionary.xml
 
 cd build
 echo "Building dictionary (This will take a long time, i.e. 10+ minutes!)"

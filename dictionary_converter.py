@@ -4,7 +4,7 @@ import xml.etree.ElementTree as ElementTree
 
 from typing import List, Tuple
 
-db = sqlite3.connect("output/kanji.db")
+db = sqlite3.connect("output/dictionary.db")
 cursor = db.cursor()
 
 CLASSIFICATIONS = {

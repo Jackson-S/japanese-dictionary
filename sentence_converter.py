@@ -1,9 +1,12 @@
 import csv
+import MeCab
+import sqlite3
 import argparse
-import xml.etree.ElementTree as ElementTree
+import jaconv
 
 from typing import Optional, List, Dict
 
+PARSER = MeCab.Tagger("-Ochasen")
 
 class WordIndex:
     def __init__(self, parameters: str):
@@ -39,10 +42,37 @@ class SentencePair:
         self.jp: str = jp_sentence
         # The sentence in English
         self.en: str = en_sentence
+        # The sentence in Japanese with Rubytext
+        self.jp_ruby: str = self.generate_ruby()
 
         # A List of indices that the dictionary will use the assign appropriate
         # sentences, made up of the words contained within the sentence.
         self.indices: List[WordIndex] = self.generate_indices(indices)
+
+    def generate_ruby(self):
+        output = PARSER.parse(self.jp).splitlines()
+
+        result = []
+
+        for tokens in map(lambda x: x.split("\t"), output[:-1]):
+            # If there's no need for changes just add the original to result
+            if len(tokens) == 1:
+                result.append(tokens[0])
+            
+            else:
+                kanji = tokens[0]
+                # Convert the katakana rubytext output to hiragana
+                hiragana = jaconv.kata2hira(tokens[1])
+                # Convert the original token to hiragana (to compare later)
+                katakana = jaconv.hira2kata(tokens[1])
+
+                # Compare the rubytext against the original to ensure they're unique.
+                if kanji != hiragana and kanji != katakana:
+                    result.append(f"<ruby>{tokens[0]}<rt>{hiragana}</rt></ruby>")
+                else:
+                    result.append(tokens[0])
+        
+        return "".join(result)
 
     def generate_indices(self, indices: str) -> List[WordIndex]:
         result: List[WordIndex] = []
@@ -61,7 +91,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("string_file", type=argparse.FileType("r"))
     parser.add_argument("index_file", type=argparse.FileType("r"))
-    parser.add_argument("-output", "-o", type=argparse.FileType("wb"))
+    parser.add_argument("--database", "-o", type=str)
     args = parser.parse_args()
 
     # Create iterators for the input CSV files
@@ -79,34 +109,34 @@ def main():
     sentence_pairs: List[SentencePair] = []
 
     for jp_id, en_id, parameters in index_csv:
-        # Check there's at least one verified word
+        # Check there's at least one verified word ("~" indicates verification)
         if "~" in parameters:
             if jp_id in sentence_list and en_id in sentence_list:
                 jp_sentence = sentence_list[jp_id]
                 en_sentence = sentence_list[en_id]
-                sentence_pair = SentencePair(
-                    jp_sentence, en_sentence, parameters)
+                sentence_pair = SentencePair(jp_sentence, en_sentence, parameters)
                 sentence_pairs.append(sentence_pair)
 
-    root = ElementTree.Element("sentences")
+    db = sqlite3.connect(args.database)
+    cursor = db.cursor()
 
-    # Generate an XML tree to output
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS Sentences (
+        word TEXT, -- The word that this sentence is an example for
+        sentence_en TEXT, -- The English translation of the sentence
+        sentence_jp TEXT, -- The original unmodified Japanese version of the sentence
+        sentence_html_ruby TEXT, -- The sentence with HTML rubytext tags added
+        UNIQUE (word, sentence_en, sentence_jp) -- Ensure all unique sentences
+    )
+    """)
+
     for pair in sentence_pairs:
-        attributes = {"jp": pair.jp, "en": pair.en}
-        sentence_node = ElementTree.SubElement(root, "entry", attributes)
-
         for index in pair.indices:
-            attributes = {"dictionary_form": index.dictionary_form}
-
-            if index.sense_number:
-                attributes["sense_index"] = index.sense_number
-
-            ElementTree.SubElement(sentence_node, "index", attributes)
-
-    # Output the XML tree
-    tree = ElementTree.ElementTree(root)
-    tree.write(args.output, "UTF-8", True)
-
+            cursor.execute("INSERT OR IGNORE INTO Sentences VALUES (?, ?, ?, ?)", (index.dictionary_form, pair.en, pair.jp, pair.jp_ruby))
+    
+    cursor.close()
+    db.commit()
+    db.close()
 
 if __name__ == "__main__":
     main()

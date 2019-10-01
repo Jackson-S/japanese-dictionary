@@ -5,7 +5,7 @@ import xml.etree.ElementTree as ElementTree
 from typing import List
 from dataclasses import dataclass
 
-similar_db = sqlite3.connect("output/kanji.db")
+similar_db = sqlite3.connect("output/dictionary.db")
 
 @dataclass
 class Reading:

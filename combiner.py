@@ -43,7 +43,6 @@ def get_arguments():
     parser = argparse.ArgumentParser()
     parser.add_argument("dictionary", type=str)
     parser.add_argument("kanji", type=str)
-    parser.add_argument("sentences", type=str)
     parser.add_argument("english_wordlist", type=str)
     parser.add_argument("-o", type=str)
     return parser.parse_args()
@@ -64,27 +63,14 @@ def create_kanji_pages(kanji_path: str, kanji_images: Set[str]) -> Dict[str, Kan
     return result
 
 
-def create_japanese_pages(dict_path: str, sentence_path: str) -> Dict[str, JapaneseEntry]:
-    sentence_tree = ElementTree.parse(sentence_path)
-    sentence_root = sentence_tree.getroot()
-
-    # Maps words to sentences containing them
-    sentence_index_list = {}
-    for item in sentence_root:
-        # Create a sentence object, which will process and split the sentence
-        sentence = Sentence(item)
-
-        for key in sentence.keys:
-            sentence_index_list.setdefault(key, [])
-            sentence_index_list[key].append(sentence)
-
+def create_japanese_pages(dict_path: str) -> Dict[str, JapaneseEntry]:
     dictionary_tree = ElementTree.parse(dict_path)
     dictionary_root = dictionary_tree.getroot()
 
     result = dict()
 
     for entry in dictionary_root:
-        new_entry = JapaneseEntry(entry, sentence_index_list)
+        new_entry = JapaneseEntry(entry)
         if new_entry.is_worth_adding():
             result[new_entry.page_title] = new_entry
 
@@ -133,7 +119,7 @@ def main():
 
     pages = {**pages, **create_kanji_pages(args.kanji, image_set)}
 
-    pages = {**pages, **create_japanese_pages(args.dictionary, args.sentences)}
+    pages = {**pages, **create_japanese_pages(args.dictionary)}
 
     japanese_entries = set(filter(lambda x: isinstance(x, JapaneseEntry), pages.values()))
 

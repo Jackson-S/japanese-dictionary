@@ -1,10 +1,8 @@
 import xml.etree.ElementTree as ElementTree
+import sqlite3
 
 from dataclasses import dataclass
 from typing import List, Optional, Set, Dict
-
-import MeCab
-import jaconv
 
 VERB_BADGES = ["Ichidan", "Ichidan (くれる)", "Godan (〜ある)", "Godan (〜ぶ)", "Godan (〜ぐ)",
                "Godan (いく・ゆく)", "Godan (〜く)", "Godan (〜む)", "Godan (〜ぬ)",
@@ -23,47 +21,18 @@ SIMPLIFICATIONS = {
     **{x: "Noun" for x in NOUN_BADGES}
 }
 
-
-class Sentence:
-    PARSER = MeCab.Tagger("-Ochasen")
-
-    def __init__(self, tag: ElementTree.Element):
-        self.english: str = tag.attrib["en"]
-        self.japanese: str = tag.attrib["jp"]
-        self.keys: set[str] = self._get_keys(tag)
-        self.sense_indices = self._get_senses(tag)
-        self.furigana_html = self._generate_furigana(self.japanese)
-
-    def _get_keys(self, tag: ElementTree.Element) -> Set[str]:
-        return set(x.attrib["dictionary_form"] for x in tag.findall("index"))
-
-    def _get_senses(self, tag: ElementTree.Element) -> Dict[str, str]:
-        indices = filter(lambda x: "sense_index" in x.attrib, tag.findall("index"))
-        return {x.attrib["dictionary_form"]: x.attrib["sense_index"] for x in indices}
-
-    def _generate_furigana(self, japanese_sentence: str) -> str:
-        parser_output = self.PARSER.parse(japanese_sentence).splitlines()
-
-        result = []
-
-        for line in parser_output[:-1]:
-            tokens = line.split("\t")
-            if len(tokens) == 1:
-                result.append(tokens[0])
-                continue
-
-            replacement = jaconv.kata2hira(tokens[1])
-            if tokens[0] not in (replacement, jaconv.hira2kata(tokens[1])):
-                result.append(f"<ruby>{tokens[0]}<rt>{replacement}</rt></ruby>")
-            else:
-                result.append(tokens[0])
-        return "".join(result)
-
+DB = sqlite3.connect("output/dictionary.db")
 
 class Entry:
     def __init__(self, page_title: str, language: str, entry_type: str):
         self.page_title: str = page_title
         self.page_id: str = "{}_{}_{}".format(language, entry_type, page_title)
+
+
+@dataclass
+class Sentence:
+    english: str
+    japanese: str
 
 
 @dataclass
@@ -87,10 +56,10 @@ class Reading:
 
 
 class JapaneseEntry(Entry):
-    def __init__(self, entry: ElementTree.Element, sentences: Dict[str, Sentence]):
+    def __init__(self, entry: ElementTree.Element):
         super().__init__(entry.attrib["title"], "jp", "dictionary")
         self.containing_kanji: List[str] = self._get_containing_kanji(entry)
-        self.sentences: List[Sentence] = self._get_sentences(sentences)
+        self.sentences: List[Sentence] = self._get_sentences()
         self.readings: List[Reading] = self._get_readings(entry)
         self.kanji: List[Reading] = self._get_kanji(entry)
         self.definitions: List[Definition] = self._get_definitions(entry)
@@ -121,9 +90,14 @@ class JapaneseEntry(Entry):
             result.append(Reading(name, info))
         return result
 
-    def _get_sentences(self, sentences: Dict[str, Sentence]):
-        result = sentences.get(self.page_title, [])
-        result.sort(key=lambda x: int(x.sense_indices.get(self.page_title, 1000)))
+    def _get_sentences(self):
+        result = []
+        cursor = DB.cursor()
+        query = cursor.execute("SELECT sentence_en, sentence_html_ruby FROM Sentences WHERE word=?", (self.page_title, ))
+
+        for en, jp in query.fetchall():
+            result.append(Sentence(en, jp))
+
         return result
 
     def _get_containing_kanji(self, tag: ElementTree.Element) -> List[str]:

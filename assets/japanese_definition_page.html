@@ -57,7 +57,7 @@
             <summary class="section_heading" apple_mouseover_disable="1">Example Sentences</summary>
             {% for sentence in entry.sentences %}
             <article class="sentence">
-                <p>{{ sentence.furigana_html | safe }}</p>
+                <p>{{ sentence.japanese | safe }}</p>
                 <p>{{ sentence.english }}</p>
             </article>
             {% endfor %}
