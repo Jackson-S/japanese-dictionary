@@ -92,7 +92,8 @@ summary:focus {
 }
 
 #sub_header > details, 
-#sub_header > section {
+#sub_header > section,
+#stroke_order {
   background-color: rgb(230,230,230);
   padding: 10px;
   border-radius: 5px;
@@ -100,7 +101,7 @@ summary:focus {
 
 #sub_header > #readings {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr;
 }
 
 #sub_header > #nanori > p {
@@ -115,7 +116,7 @@ summary:focus {
   margin-right: 10px;
 }
 
-#sub_header > #stroke_order > img {
+#stroke_order > img {
   width: 100%;
 }
 
@@ -183,11 +184,17 @@ summary:focus {
   overflow-x: hidden;
 }
 
-#containing_kanji a {
+#containing_kanji a, 
+#similar_kanji a {
   color: black;
-  font-size: larger;
   margin-right: 5px;
+  text-decoration: none;
 }
+
+#similar_kanji .reading * {
+  display: inline;
+}
+
 /* End ID styles */
 
 /* Dark mode style */
@@ -218,6 +225,7 @@ html.apple_client-panel * {
 }
 
 html.apple_client-panel #sub_header,
+html.apple_client-panel #stroke_order,
 html.apple_client-panel .badge,
 html.apple_client-panel .section_heading,
 html.apple_client-panel .translation_info {
@@ -268,7 +276,8 @@ html.apple_client-spotlight #header h1 {
 }
 
 /* Hide the subheader information */
-html.apple_client-spotlight #sub_header {
+html.apple_client-spotlight #sub_header,
+html.apple_client-spotlight #stroke_order {
   display: none;
 }
 /* End spotlight style */

@@ -1,28 +1,22 @@
+import sqlite3
 import argparse
 import xml.etree.ElementTree as ElementTree
 
 from typing import List
 from dataclasses import dataclass
 
+similar_db = sqlite3.connect("output/similar_kanji.db")
 
 @dataclass
 class Reading:
-    def __init__(self, reading: str, reading_type: str):
-        # The reading in hirigana
-        self.reading: str = reading
-
-        # The type of reading ("on"|"kun"|"nan") = (On-Yomi | Kun-Yomi | Nanori)
-        self.type: str = reading_type
+    reading: str
+    type: str
 
 
 @dataclass
 class Definition:
-    def __init__(self, index: int, translations: List[str]):
-        # The index of the definition
-        self.index: int = index
-
-        # The list of translations for this index
-        self.translations: List[str] = translations
+    index: int
+    translations: List[str]
 
 
 class KanjiEntry:
@@ -40,10 +34,13 @@ class KanjiEntry:
         self.nanori: List[str] = []
 
         # List of radicals as an index (according to Kangxi radicals system)
-        self.radicals: List[int] = []
+        self.radicals: List[str] = []
 
         # List of Definition objects. Each one can contain a series of translations, and has an index
         self.definitions: List[Definition] = []
+
+        # List of similar kanji according to stroke order or radicals
+        self.similar_kanji: List[List[str]] = []
 
         self._read_tag(kanjidic2_tag)
 
@@ -108,19 +105,25 @@ class KanjiEntry:
 
         # Add the radical data
         for rad_value in tag.find("radical").findall("rad_value"):
-            self.radicals.append(int(rad_value.text))
+            self.radicals.append(rad_value.text)
 
         for codepoint in tag.find("codepoint").findall("cp_value"):
             if codepoint.attrib["cp_type"] == "ucs":
                 self.utf8_codepoint = codepoint.text
                 break
 
+        global similar_db
+        cursor = similar_db.cursor()
+        search = cursor.execute("SELECT similar, meaning FROM Similarity WHERE root=? AND similarity > 0.7", (self.page_title, ))
+        results = search.fetchall()
+        for result in results:
+            self.similar_kanji.append(result)
 
-def append_tag(parent: ElementTree.Element, tag_name: str, text=None, attribs=None) -> ElementTree.Element:
+def append_tag(parent: ElementTree.Element, tag_name: str, text=None, attr=None) -> ElementTree.Element:
     tag = ElementTree.SubElement(parent, tag_name)
     if text:
         tag.text = text
-    tag.attrib = attribs
+    tag.attrib = attr
     return tag
 
 
@@ -151,23 +154,24 @@ def main():
             entry_root = ElementTree.Element("entry", attribs)
 
             for radical in entry.radicals:
-                append_tag(entry_root, "radical", str(radical))
-
-            readings = ElementTree.SubElement(entry_root, "readings")
+                append_tag(entry_root, "radical", attr={"id": radical})
 
             for reading in entry.on_yomi:
-                append_tag(readings, "reading", reading, {"type": "on_yomi"})
+                append_tag(entry_root, "reading", attr={"type": "on", "text": reading})
 
             for reading in entry.kun_yomi:
-                append_tag(readings, "reading", reading, {"type": "kun_yomi"})
+                append_tag(entry_root, "reading", attr={"type": "kun", "text": reading})
 
             for reading in entry.nanori:
-                append_tag(readings, "reading", reading, {"type": "nanori"})
+                append_tag(entry_root, "reading", attr={"type": "nanori", "text": reading})
+            
+            for similar in entry.similar_kanji:
+                append_tag(entry_root, "similar_kanji", attr={"kanji": similar[0], "meaning": similar[1]})
 
             for definition_group in entry.definitions:
                 sense = ElementTree.SubElement(entry_root, "sense")
                 for word in definition_group.translations:
-                    append_tag(sense, "translation", word)
+                    append_tag(sense, "translation", attr={"text": word})
 
             root.append(entry_root)
 

@@ -1,11 +1,11 @@
 <body>
+    <script>var html=document.getElementsByTagName("html")[0];var classes=html.className.split(" ");if(classes.indexOf("apple_client-application")!=-1){if(classes.indexOf("apple_display-separateview")==-1){html.classList.add("apple_client-spotlight")}}</script>
     <section id="header">
         <h1 id="page_title">{{ entry.page_title }}</h1>
     </section>
 
     <section id="sub_header">
-
-        {% if entry.on_yomi | count > 0 and entry.kun_yomi | count > 0 %}
+        {% if entry.on_yomi | count > 0 or entry.kun_yomi | count > 0 or entry.nanori | count > 0 %}
         <section id="readings">
 
             {% if entry.on_yomi | count > 0 %}
@@ -30,29 +30,29 @@
             </section>
             {% endif %}
 
+            {% if entry.nanori | count > 0 %}
+            <section id="nanori">
+                <h3 class="section_heading" apple_mouseover_disable="1">Nanori</h3>
+                {% for reading in entry.nanori %}
+                
+                <p>{{ reading }}</p>
+                {% endfor %}
+            </section>
+            {% endif %}
+
         </section>
         {% endif %}
 
-        {% if entry.nanori | count > 0 %}
-        <details id="nanori">
-            <summary class="section_heading" apple_mouseover_disable="1">Nanori</summary>
-            {% for reading in entry.nanori %}
-            {% if loop.last %}
-            <p>{{ reading }}</p>
-            {% else %}
-            <p>{{ reading }}、</p>
-            {% endif %}
+        {% if entry.similar_kanji | count > 0 %}
+        <section id="similar_kanji">
+            <h3 class="section_heading" apple_mouseover_disable="1">Similar Kanji</h3>
+            {% for similar in entry.similar_kanji %}
+            <div class="reading">
+                <a href="x-dictionary:r:jp_kanji_{{ similar[0] }}">{{ similar[0] }}</a>
+                <p>{{ similar[1] }}</p>
+            </div>
             {% endfor %}
-        </details>
-        {% endif %}
-
-
-        {% if entry.image %}
-        <details id="stroke_order">
-            <summary class="section_heading" apple_mouseover_disable="1">Stroke Order</summary>
-            <img src="Images/{{ entry.image }}" />
-        </details>
-
+        </section>
         {% endif %}
     </section>
 
@@ -73,5 +73,11 @@
         </article>
         {% endfor %}
     </section>
-    <script>var html=document.getElementsByTagName("html")[0];var classes=html.className.split(" ");if(classes.indexOf("apple_client-application")!=-1){if(classes.indexOf("apple_display-separateview")==-1){html.classList.add("apple_client-spotlight")}}</script>
+
+    {% if entry.image %}
+    <section id="stroke_order">
+        <h3 class="section_heading" apple_mouseover_disable="1">Stroke Order</h3>
+        <img src="Images/{{ entry.image }}" />
+    </section>
+    {% endif %}
 </body>

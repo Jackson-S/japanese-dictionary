@@ -25,6 +25,7 @@ cp ./assets/Makefile ./build/Makefile
 cp ./assets/info.plist ./build/JapaneseDictionary.plist
 cp ./assets/style.css ./build/JapaneseDictionary.css
 mkdir build/OtherResources
+cp ./assets/script.js ./build/OtherResources/script.js
 cp ./assets/prefs.html ./build/OtherResources/JapaneseDictionary_prefs.html
 mkdir build/OtherResources/Images
 tar -xzf ./assets/kanjivg.tar.xz -C ./build/OtherResources/Images
@@ -33,6 +34,8 @@ mkdir output
 
 echo "Processing sample sentences"
 python3 ./sentence_converter.py ./input/sentences.csv ./input/jpn_indices.csv -o output/sentences.xml
+echo "Compiling similar Kanji"
+python3 ./similar_kanji.py
 echo "Processing Kanji"
 python3 ./kanjidic_converter.py ./input/kanjidic2_sample.xml
 echo "Processing Dictionary"
