@@ -34,8 +34,9 @@
             <section id="nanori">
                 <h3 class="section_heading" apple_mouseover_disable="1">Nanori</h3>
                 {% for reading in entry.nanori %}
-                
-                <p>{{ reading }}</p>
+                <div class="reading">
+                    <p>{{ reading }}</p>
+                </div>
                 {% endfor %}
             </section>
             {% endif %}
