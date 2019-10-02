@@ -1,5 +1,6 @@
 import os
 import argparse
+import sqlite3
 import xml.etree.ElementTree as ElementTree
 
 from typing import Set, Dict
@@ -78,33 +79,21 @@ def create_japanese_pages(dict_path: str) -> Dict[str, JapaneseEntry]:
 
 
 def create_english_pages(english_wordlist_path: str, japanese_entries: Set[JapaneseEntry]) -> Dict[str, EnglishEntry]:
-    english_wordlist = set()
+    db = sqlite3.connect("output/dictionary.db")
+    cursor = db.cursor()
+
     result: Dict[str, EnglishEntry] = dict()
 
-    with open(english_wordlist_path) as in_file:
-        english_wordlist = set(x.strip() for x in in_file.readlines())
+    query = cursor.execute("SELECT * FROM EnglishTranslations")
 
-    for page in japanese_entries:
-        for definition in page.definitions:
-            for translation in definition.translations:
-                variant_words = (
-                    translation,
-
-                    # Account for translations like 'Red (communist)'
-                    translation.split("(")[0].strip(),
-
-                    # Account for words given in the infinitive i.e. 'to get up'
-                    translation.replace("to ", ""),
-
-                    # Account for a mix of above
-                    translation.replace("to ", "").split("(")[0].strip()
-                )
-
-                for word in variant_words:
-                    if word in english_wordlist:
-                        context = [x for x in definition.translations if x != word]
-                        result.setdefault(word, EnglishEntry(word))
-                        result[word].add_translation(page.page_title, context, definition.pos)
+    for en, expl, jp, context, pos, sense in query.fetchall():
+        if en not in result:
+            result[en] = EnglishEntry(en)
+        
+        if expl != None:
+            result[en].add_translation(jp, [expl,], pos.split(", "))
+        else:
+            result[en].add_translation(jp, context.split(", "), pos.split(", "))
 
     return result
 

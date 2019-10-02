@@ -125,23 +125,9 @@ class EnglishEntry(Entry):
         # Simplify the context (remove equivalent items)
         context: List[str] = list(set(context))
 
-        # If there is already an entry on that page for this kanji with the same part of speech
-        existing_entry = self._already_contains(japanese_word, simplified_pos)
-
-        if existing_entry:
-            existing_context = existing_entry.context_words
-            filtered_context = filter(lambda x: x not in existing_context, context)
-            existing_entry.context_words.extend(filtered_context)
-
-        else:
-            translation = Translation(japanese_word, context, simplified_pos)
-            self.translations.append(translation)
-
-    def _already_contains(self, japanese_word: str, pos: List[str]) -> Optional[Translation]:
-        for translation in self.translations:
-            if translation.japanese_word == japanese_word:
-                return translation
-        return None
+        # Add the translation
+        translation = Translation(japanese_word, context, simplified_pos)
+        self.translations.append(translation)
 
     def _simplify_parts_of_speech(self, speech_parts: List[str]) -> List[str]:
         return sorted(list({SIMPLIFICATIONS.get(x, x) for x in speech_parts}))

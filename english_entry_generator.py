@@ -16,10 +16,12 @@ CREATE TABLE IF NOT EXISTS EnglishTranslations (
 """)
 
 def get_base_word(word: str):
+    word = word
     if "(" in word and word[-1] == ")":
-        return word[:word.find("(")].strip()
-    else:
-        return word
+        word = word[:word.find("(")].strip()
+    if "to " in word:
+        word = word.replace("to ", "")
+    return word
 
 
 root = ElementTree.parse("output/dictionary.xml").getroot()

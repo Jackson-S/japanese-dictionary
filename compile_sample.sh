@@ -21,8 +21,8 @@ rm -rf build
 rm -rf output
 
 mkdir build
-cp ./assets/Makefile ./build/Makefile
-cp ./assets/info.plist ./build/JapaneseDictionary.plist
+cp ./assets/Makefile_sample ./build/Makefile
+cp ./assets/info_sample.plist ./build/JapaneseDictionary.plist
 cp ./assets/style.css ./build/JapaneseDictionary.css
 mkdir build/OtherResources
 cp ./assets/script.js ./build/OtherResources/script.js
@@ -40,13 +40,14 @@ echo "Processing Kanji"
 python3 ./kanjidic_converter.py ./input/kanjidic2_sample.xml
 echo "Processing Dictionary"
 python3 ./dictionary_converter.py ./input/JMdict_e_sample.xml
+echo "Compiling English entries"
+python3 ./english_entry_generator.py
 echo "Combining processed files"
 python3 ./combiner.py ./output/dictionary.xml ./output/kanji.xml ./input/english.txt -o ./build/JapaneseDictionary.xml
 
 cd build
 echo "Building dictionary (This will take a long time, i.e. 10+ minutes!)"
 make
-# Uncomment this to install the dictionary
-# make install
+make install
 
 cd ..
