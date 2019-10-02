@@ -93,10 +93,11 @@ class JapaneseEntry(Entry):
     def _get_sentences(self):
         result = []
         cursor = DB.cursor()
-        query = cursor.execute("SELECT sentence_en, sentence_html_ruby FROM Sentences WHERE word=?", (self.page_title, ))
+        query = cursor.execute("SELECT en, jp FROM SentencePairs WHERE word=?;", (self.page_title, ))
 
         for en, jp in query.fetchall():
             result.append(Sentence(en, jp))
+        cursor.close()
 
         return result
 

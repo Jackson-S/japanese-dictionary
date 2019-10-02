@@ -122,17 +122,28 @@ def main():
 
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS Sentences (
-        word TEXT, -- The word that this sentence is an example for
-        sentence_en TEXT, -- The English translation of the sentence
-        sentence_jp TEXT, -- The original unmodified Japanese version of the sentence
-        sentence_html_ruby TEXT, -- The sentence with HTML rubytext tags added
-        UNIQUE (word, sentence_en, sentence_jp) -- Ensure all unique sentences
+        id INTEGER PRIMARY KEY, -- Will be used to refer to sentence pairs by containing word
+        en TEXT, -- The English translation of the sentence
+        jp TEXT -- The Japanese sentence with HTML rubytext tags added
     )
     """)
 
-    for pair in sentence_pairs:
-        for index in pair.indices:
-            cursor.execute("INSERT OR IGNORE INTO Sentences VALUES (?, ?, ?, ?)", (index.dictionary_form, pair.en, pair.jp, pair.jp_ruby))
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS SentenceWords (
+        word TEXT, -- A word that the sentence_id pair contains
+        id INTEGER REFERENCES Sentences(id)
+    )
+    """)
+
+    cursor.execute("""
+    CREATE VIEW IF NOT EXISTS SentencePairs AS 
+        SELECT word, en, jp FROM SentenceWords JOIN Sentences ON (SentenceWords.id = Sentences.id)
+    """)
+
+    for index, pair in enumerate(sentence_pairs):
+        cursor.execute("INSERT OR IGNORE INTO Sentences VALUES (?, ?, ?)", (index, pair.en, pair.jp))
+        for word in pair.indices:
+            cursor.execute("INSERT OR IGNORE INTO SentenceWords VALUES (?, ?)", (word.dictionary_form, index))
     
     cursor.close()
     db.commit()
