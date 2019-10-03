@@ -4,8 +4,7 @@ import xml.etree.ElementTree as ElementTree
 
 from typing import List, Tuple
 
-db = sqlite3.connect("output/dictionary.db")
-cursor = db.cursor()
+DB = sqlite3.connect("output/dictionary.db")
 
 CLASSIFICATIONS = {
     "noun or verb acting prenominally": "Prenominal Noun",
@@ -219,13 +218,15 @@ class DictionaryEntry:
             self.definitions.append(new_definition)
 
     def add_containing_kanji(self) -> List[List[str]]:
+        # Deduplicate title while perserving order
+        seen_chars = set()
+        unique_chars = [c for c in self.title if not (c in seen_chars or seen_chars.add(c))]
+
         result = []
-        global cursor
-        for character in set(self.title):
-            query = cursor.execute("SELECT character, meaning FROM Kanji WHERE character=?", (character, ))
-            query_result = query.fetchone()
-            if query_result:
-                result.append(list(query_result))
+        for character in unique_chars:
+                kanji = DB.execute("SELECT character, meaning FROM Kanji WHERE character=?", (character, )).fetchone()
+                if kanji:
+                    result.append(list(kanji))
         return result
 
 
