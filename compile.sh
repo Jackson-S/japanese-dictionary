@@ -62,8 +62,3 @@ mv compressed.xml JapaneseDictionary.xml
 
 make
 make install
-
-# Return to initial directory and clean up build files
-cd ..
-rm -rf output
-rm -rf build
