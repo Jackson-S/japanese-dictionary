@@ -687,4 +687,29 @@ various information fields.
             <gloss>every day</gloss>
         </sense>
     </entry>
+
+    <!-- Duplicate kanji test -->
+    <entry>
+        <ent_seq>1611370</ent_seq>
+        <k_ele>
+            <keb>日日</keb>
+            <ke_pri>ichi1</ke_pri>
+            <ke_pri>news1</ke_pri>
+            <ke_pri>nf23</ke_pri>
+        </k_ele>
+        <k_ele>
+            <keb>日にち</keb>
+        </k_ele>
+        <r_ele>
+            <reb>ひにち</reb>
+            <re_pri>ichi1</re_pri>
+            <re_pri>news1</re_pri>
+            <re_pri>nf23</re_pri>
+        </r_ele>
+        <sense>
+            <pos>&n;</pos>
+            <gloss>the number of days</gloss>
+            <gloss>date</gloss>
+        </sense>
+    </entry>
 </JMdict>
