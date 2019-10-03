@@ -7,7 +7,7 @@ from DictionaryEntry import Entry, JapaneseEntry, EnglishEntry, KanjiEntry
 
 class DictionaryOutput:
     def __init__(self, pages):
-        dict_entries = filter(lambda x: isinstance(x, JapaneseEntry), pages.values())
+        dict_entries = filter(lambda x: isinstance(x, JapaneseEntry), pages)
         self.full_entries = set(map(lambda x: x.page_title, dict_entries))
 
         self.root: ElementTree.Element = ElementTree.Element(
@@ -31,7 +31,7 @@ class DictionaryOutput:
                 "english_definition_page.html")
         }
 
-        for page in pages.values():
+        for page in pages:
             self.generate_entry(page)
 
     def has_full_entry(self, kanji_page: KanjiEntry):

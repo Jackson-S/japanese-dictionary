@@ -3,7 +3,7 @@ import argparse
 import sqlite3
 import xml.etree.ElementTree as ElementTree
 
-from typing import Set, Dict
+from typing import Set, Dict, List
 
 from DictionaryEntry import Entry, JapaneseEntry, EnglishEntry, KanjiEntry, Sentence
 from DictionaryOutput import DictionaryOutput
@@ -49,8 +49,8 @@ def get_arguments():
     return parser.parse_args()
 
 
-def create_kanji_pages(kanji_path: str, kanji_images: Set[str]) -> Dict[str, KanjiEntry]:
-    result = dict()
+def create_kanji_pages(kanji_path: str, kanji_images: Set[str]) -> List[KanjiEntry]:
+    result = []
 
     # Open the kanji XML file
     tree = ElementTree.parse(kanji_path)
@@ -58,27 +58,34 @@ def create_kanji_pages(kanji_path: str, kanji_images: Set[str]) -> Dict[str, Kan
 
     # Create all the pages for the kanji
     for entry in root:
-        new_entry = KanjiEntry(entry, kanji_images)
-        result[new_entry.page_id] = new_entry
+        result.append(KanjiEntry(entry, kanji_images))
 
     return result
 
 
-def create_japanese_pages(dict_path: str) -> Dict[str, JapaneseEntry]:
+def create_japanese_pages(dict_path: str) -> List[JapaneseEntry]:
     dictionary_tree = ElementTree.parse(dict_path)
     dictionary_root = dictionary_tree.getroot()
 
-    result = dict()
+    result = {}
 
     for entry in dictionary_root:
         new_entry = JapaneseEntry(entry)
         if new_entry.is_worth_adding():
-            result[new_entry.page_title] = new_entry
+            if new_entry.page_id in result:
+                # Deduplicate page ids (Kinda hacky, may fix later)
+                page_id = new_entry.page_id
+                for x in range(1000):
+                    page_id_new = f"{page_id}-{x}"
+                    if page_id_new not in result:
+                        new_entry.page_id = page_id_new
+            
+            result[new_entry.page_id] = new_entry
 
-    return result
+    return list(result.values())
 
 
-def create_english_pages(english_wordlist_path: str, japanese_entries: Set[JapaneseEntry]) -> Dict[str, EnglishEntry]:
+def create_english_pages() -> List[EnglishEntry]:
     db = sqlite3.connect("output/dictionary.db")
     cursor = db.cursor()
 
@@ -95,7 +102,7 @@ def create_english_pages(english_wordlist_path: str, japanese_entries: Set[Japan
         else:
             result[en].add_translation(jp, context.split(", "), pos.split(", "))
 
-    return result
+    return list(result.values())
 
 
 def main():
@@ -106,20 +113,18 @@ def main():
 
     image_set = set(filter(lambda x: ".svg" in x, os.listdir("./build/OtherResources/Images")))
 
-    pages = {**pages, **create_kanji_pages(args.kanji, image_set)}
-
-    pages = {**pages, **create_japanese_pages(args.dictionary)}
-
-    japanese_entries = set(filter(lambda x: isinstance(x, JapaneseEntry), pages.values()))
-
-    pages = {**pages, **create_english_pages(args.english_wordlist, japanese_entries)}
+    pages = set([
+        *create_kanji_pages(args.kanji, image_set),
+        *create_japanese_pages(args.dictionary),
+        *create_english_pages()
+    ])
 
     dictionary = DictionaryOutput(pages)
 
     tree = ElementTree.ElementTree(dictionary.root)
     tree.write(args.o, "UTF-8", True)
 
-    get_stats(pages.values())
+    get_stats(pages)
 
 
 if __name__ == "__main__":

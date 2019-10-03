@@ -23,6 +23,7 @@ SIMPLIFICATIONS = {
 
 DB = sqlite3.connect("output/dictionary.db")
 
+
 class Entry:
     def __init__(self, page_title: str, language: str, entry_type: str):
         self.page_title: str = page_title
@@ -33,6 +34,19 @@ class Entry:
 class Sentence:
     english: str
     japanese: str
+
+
+SENTENCES = {}
+SENTENCE_WORDS = {}
+
+for index, en, jp in DB.execute("SELECT id, en, jp FROM Sentences").fetchall():
+    SENTENCES[index] = Sentence(en, jp)
+
+for word, index in DB.execute("SELECT word, id FROM SentenceWords").fetchall():
+    if word in SENTENCE_WORDS:
+        SENTENCE_WORDS[word].append(SENTENCES[index])
+    else:
+        SENTENCE_WORDS[word] = [SENTENCES[index]]
 
 
 @dataclass
@@ -91,15 +105,7 @@ class JapaneseEntry(Entry):
         return result
 
     def _get_sentences(self):
-        result = []
-        cursor = DB.cursor()
-        query = cursor.execute("SELECT en, jp FROM SentencePairs WHERE word=?;", (self.page_title, ))
-
-        for en, jp in query.fetchall():
-            result.append(Sentence(en, jp))
-        cursor.close()
-
-        return result
+        return SENTENCE_WORDS.get(self.page_title, [])
 
     def _get_containing_kanji(self, tag: ElementTree.Element) -> List[str]:
         result = []
