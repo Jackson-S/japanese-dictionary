@@ -1,5 +1,8 @@
+import re
 import sqlite3
 from xml.etree import ElementTree
+
+from typing import List
 
 db = sqlite3.connect("output/dictionary.db")
 cursor = db.cursor()
@@ -15,40 +18,47 @@ CREATE TABLE IF NOT EXISTS EnglishTranslations (
 )
 """)
 
-def get_base_word(word: str):
-    word = word
-    if "(" in word and word[-1] == ")":
-        word = word[:word.find("(")].strip()
-    if "to " in word:
-        word = word.replace("to ", "")
-    return word
+
+def get_base_word(title: str) -> str:
+    return re.sub(r"\([^)]*\)", "", title)
+
+
+def get_explanations(title: str) -> List[str]:
+    # Find all bracketed text in the page title, i.e. "(this) is a (definition)"
+    # will return (this), (definition)
+    explanations = re.findall(r"\([^)]*\)", title)
+    # Remove brackets from explanation
+    return [re.sub("[\(,\)]", "", x) for x in explanations]
 
 
 root = ElementTree.parse("output/dictionary.xml").getroot()
 for entry in root.findall("entry"):
     # Add the entry title into the reverse lookup table
     entry_title = entry.attrib["title"]
-    
+
     for index, definition_tag in enumerate(entry.findall("definition")):
-        translations = []
         for translation_tag in definition_tag.findall("translation"):
             translation = translation_tag.text
-            # Separate the translations from explanations (anything in brackets)
-            if "(" in translation and translation[-1] == ")":
-                base = translation[:translation.find("(")].strip()
-                explanation = translation[translation.find("(")+1:-1]
-            else:
-                base = translation
-                explanation = None
-            
-            # Create the value tuple for the EnglishTranslations table
-            cursor.execute("INSERT INTO EnglishTranslations VALUES (?, ?, ?, ?, ?, ?)", 
-                (base,
-                explanation,
-                entry_title,
-                ", ".join(get_base_word(x.text) for x in definition_tag.findall("translation") if get_base_word(x.text) != base),
-                ", ".join(x.text for x in definition_tag.findall("pos")),
-                index)
+
+            base = get_base_word(translation)
+
+            # Ignore super long translation text, since these are usually explanations.
+            # The dictionary can't have keys longer than 128 chars anyway.
+            if len(base) > 32 or base == "":
+                continue
+
+            explanations = ", ".join(get_explanations(translation))
+
+            # Get the context and remove the current word from it
+            context = [get_base_word(x.text) for x in definition_tag.findall("translation")]
+            context.remove(base)
+            context = ", ".join(context)
+
+            parts_of_speech = ", ".join([x.text for x in definition_tag.findall("pos")])
+
+            cursor.execute(
+                "INSERT INTO EnglishTranslations VALUES (?, ?, ?, ?, ?, ?)",
+                (base, explanations, entry_title, context, parts_of_speech, index)
             )
 
 cursor.close()
