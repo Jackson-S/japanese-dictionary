@@ -141,7 +141,7 @@ def main():
     """)
 
     for index, pair in enumerate(sentence_pairs):
-        cursor.execute("INSERT OR IGNORE INTO Sentences VALUES (?, ?, ?)", (index, pair.en, pair.jp))
+        cursor.execute("INSERT OR IGNORE INTO Sentences VALUES (?, ?, ?)", (index, pair.en, pair.jp_ruby))
         for word in pair.indices:
             cursor.execute("INSERT OR IGNORE INTO SentenceWords VALUES (?, ?)", (word.dictionary_form, index))
     

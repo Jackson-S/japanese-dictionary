@@ -43,6 +43,10 @@ python3 ./kanjidic_converter.py ./input/kanjidic2.xml
 echo "Processing Dictionary"
 python3 ./dictionary_converter.py ./input/JMdict_e.xml
 
+# Create a database of English translations
+echo "Compiling English entries"
+python3 ./english_entry_generator.py
+
 # Combine the simplified XML files into the output Apple Dictionary XML file.
 echo "Combining processed files"
 python3 ./combiner.py ./output/dictionary.xml ./output/kanji.xml ./input/english.txt -o ./build/JapaneseDictionary.xml
@@ -58,8 +62,3 @@ mv compressed.xml JapaneseDictionary.xml
 
 make
 make install
-
-# Return to initial directory and clean up build files
-cd ..
-rm -rf output
-rm -rf build

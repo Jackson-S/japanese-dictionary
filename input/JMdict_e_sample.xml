@@ -406,6 +406,98 @@ various information fields.
 ]>
 <!-- JMdict created: 2019-07-28 -->
 <JMdict>
+    <!-- Test Duplicate entries -->
+    <entry>
+        <ent_seq>1165970</ent_seq>
+        <k_ele>
+            <keb>一番</keb>
+            <ke_pri>ichi1</ke_pri>
+            <ke_pri>news1</ke_pri>
+            <ke_pri>nf01</ke_pri>
+        </k_ele>
+        <k_ele>
+            <keb>１番</keb>
+        </k_ele>
+        <r_ele>
+            <reb>いちばん</reb>
+            <re_pri>ichi1</re_pri>
+            <re_pri>news1</re_pri>
+            <re_pri>nf01</re_pri>
+        </r_ele>
+        <sense>
+            <pos>&n;</pos>
+            <pos>&adj-no;</pos>
+            <gloss>number one</gloss>
+            <gloss>first</gloss>
+            <gloss>first place</gloss>
+        </sense>
+        <sense>
+            <pos>&adv;</pos>
+            <gloss>best</gloss>
+            <gloss>most</gloss>
+        </sense>
+        <sense>
+            <pos>&n;</pos>
+            <gloss>game</gloss>
+            <gloss>round</gloss>
+            <gloss>bout</gloss>
+        </sense>
+        <sense>
+            <pos>&adv;</pos>
+            <xref>試しに</xref>
+            <gloss>as a test</gloss>
+            <gloss>as an experiment</gloss>
+            <gloss>by way of experiment</gloss>
+            <gloss>by way of trial</gloss>
+            <gloss>tentatively</gloss>
+        </sense>
+        <sense>
+            <pos>&n;</pos>
+            <gloss>song (e.g. in noh)</gloss>
+            <gloss>piece</gloss>
+        </sense>
+    </entry>
+    <entry>
+        <ent_seq>1165980</ent_seq>
+        <k_ele>
+            <keb>一番</keb>
+        </k_ele>
+        <k_ele>
+            <keb>一つがい</keb>
+        </k_ele>
+        <k_ele>
+            <keb>１つがい</keb>
+        </k_ele>
+        <r_ele>
+            <reb>ひとつがい</reb>
+        </r_ele>
+        <sense>
+            <pos>&n;</pos>
+            <misc>&uk;</misc>
+            <gloss>pair</gloss>
+            <gloss>couple</gloss>
+            <gloss>brace</gloss>
+        </sense>
+    </entry>
+
+    <!-- Test entry kanji ordering  -->
+    <entry>
+        <ent_seq>2103660</ent_seq>
+        <k_ele>
+            <keb>一番上</keb>
+            <ke_pri>spec1</ke_pri>
+        </k_ele>
+        <r_ele>
+            <reb>いちばんうえ</reb>
+            <re_pri>spec1</re_pri>
+        </r_ele>
+        <sense>
+            <pos>&adj-no;</pos>
+            <gloss>topmost</gloss>
+        </sense>
+    </entry>
+
+    <!-- Full dictionary version test (ignores correct languages) -->
     <entry>
         <ent_seq>2013900</ent_seq>
         <k_ele>
@@ -573,6 +665,8 @@ various information fields.
             <gloss xml:lang="spa">rojo</gloss>
         </sense>
     </entry>
+
+    <!-- General small entry test -->
     <entry>
         <ent_seq>1524720</ent_seq>
         <k_ele>
@@ -591,6 +685,31 @@ various information fields.
             <pos>&n-adv;</pos>
             <pos>&n-t;</pos>
             <gloss>every day</gloss>
+        </sense>
+    </entry>
+
+    <!-- Duplicate kanji test -->
+    <entry>
+        <ent_seq>1611370</ent_seq>
+        <k_ele>
+            <keb>日日</keb>
+            <ke_pri>ichi1</ke_pri>
+            <ke_pri>news1</ke_pri>
+            <ke_pri>nf23</ke_pri>
+        </k_ele>
+        <k_ele>
+            <keb>日にち</keb>
+        </k_ele>
+        <r_ele>
+            <reb>ひにち</reb>
+            <re_pri>ichi1</re_pri>
+            <re_pri>news1</re_pri>
+            <re_pri>nf23</re_pri>
+        </r_ele>
+        <sense>
+            <pos>&n;</pos>
+            <gloss>the number of days</gloss>
+            <gloss>date</gloss>
         </sense>
     </entry>
 </JMdict>

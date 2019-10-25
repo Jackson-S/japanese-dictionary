@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>DCSDictionaryLanguages</key>
+	<array>
+		<dict>
+			<key>DCSDictionaryDescriptionLanguage</key>
+			<string>ja</string>
+			<key>DCSDictionaryIndexLanguage</key>
+			<string>en</string>
+		</dict>
+		<dict>
+			<key>DCSDictionaryDescriptionLanguage</key>
+			<string>en</string>
+			<key>DCSDictionaryIndexLanguage</key>
+			<string>ja</string>
+		</dict>
+	</array>
+	<key>Bundle display name</key>
+	<string>Japanese - English Dictionary Sample</string>
+	<key>DCSDictionaryPrimaryLanguage</key>
+	<string>ja</string>
+	<key>DCSDictionaryCSS</key>
+	<string>JapaneseDictionary.css</string>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>English</string>
+	<key>CFBundleIdentifier</key>
+	<string>com.jackson-s.dictionary.ja-en.JapaneseDictionarySample</string>
+	<key>CFBundleName</key>
+	<string>Japanese - English Sample</string>
+	<key>CFBundleShortVersionString</key>
+	<string>1.0</string>
+	<key>DCSDictionaryManufacturerName</key>
+	<string>Jackson S</string>
+	<key>DCSDictionaryPrefsHTML</key>
+	<string>JapaneseDictionary_prefs.html</string>
+	<key>DCSDictionaryUseSystemAppearance</key>
+	<true/>
+	<key>DCSDictionaryNativeDisplayName</key>
+	<string>Japanese - English Dictionary Sample</string>
+</dict>
+</plist>

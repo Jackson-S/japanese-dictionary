@@ -86,9 +86,8 @@ summary:focus {
   display: inline-block;
 }
 
-#sub_header {
-  display: grid;
-  grid-gap: 10px;
+#sub_header > section {
+  margin: 0 0 10px 0;
 }
 
 #sub_header > details, 
@@ -102,18 +101,6 @@ summary:focus {
 #sub_header > #readings {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
-}
-
-#sub_header > #nanori > p {
-  display: inline-block;
-}
-
-#sub_header > #readings .reading {
-  display: flex;
-}
-
-#sub_header > #readings .reading > p {
-  margin-right: 10px;
 }
 
 #stroke_order > img {
@@ -187,13 +174,21 @@ summary:focus {
 #containing_kanji a, 
 #similar_kanji a {
   color: black;
-  margin-right: 5px;
   text-decoration: none;
 }
 
-#containing_kanji .reading *, 
-#similar_kanji .reading * {
-  display: inline;
+#similar_kanji .reading,
+#containing_kanji .reading {
+  display: grid;
+  grid-template-columns: 1.5em calc(100% - 1.5em - 10px);   /* Safari being awful as usual...*/
+  grid-gap: 10px;
+}
+
+#similar_kanji p,
+#containing_kanji p {
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* End ID styles */
