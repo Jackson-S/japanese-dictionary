@@ -272,8 +272,12 @@ html.apple_client-spotlight #header h1 {
 }
 
 /* Hide the subheader information */
-html.apple_client-spotlight #sub_header,
+html.apple_client-spotlight #sub_header > *,
 html.apple_client-spotlight #stroke_order {
   display: none;
+}
+
+html.apple_client-spotlight #sub_header > .reading {
+  display: block;
 }
 /* End spotlight style */
