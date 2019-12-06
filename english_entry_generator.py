@@ -1,65 +1,58 @@
-import re
 import sqlite3
-from xml.etree import ElementTree
+from typing import Optional, List
+from dataclasses import dataclass
 
-from typing import List
+
+@dataclass
+class Translation:
+    word: str
+    meaning: str
+    translation: str
+    alternate: Optional[str]
+    literal: Optional[str]
+    qualifier: Optional[str]
+
+
+input_db = sqlite3.connect("input/English_Wiktionary.db")
+cursor = input_db.cursor()
+
+query = cursor.execute("SELECT word, meaning, translation, alternate, literal, qualifier FROM Translations WHERE language='ja';")
+
+wordlist = []
+
+for word, meaning, translation, alternate, literal, qualifier in query.fetchall():
+    translation = Translation(word, meaning, translation, alternate, literal, qualifier)
+    wordlist.append(translation)
+
+cursor.close()
+input_db.commit()
+input_db.close()
 
 db = sqlite3.connect("output/dictionary.db")
 cursor = db.cursor()
 
 cursor.execute("""
 CREATE TABLE IF NOT EXISTS EnglishTranslations (
-    en TEXT, -- English Translation
-    explanation TEXT, -- Any further explanation of en translation i.e. "distant to speaker and listener"
-    jp TEXT, -- Japanese Word
-    context TEXT, -- Comma seperated list of other translations
-    speech_parts TEXT, -- Comma seperated list of speech parts
-    sense_index INTEGER -- Index of sense in JMDict
+    english TEXT NOT NULL, -- English Translation
+    meaning TEXT NOT NULL, -- Any further explanation of en translation i.e. "distant to speaker and listener"
+    translation TEXT NOT NULL, -- Japanese Word
+    alternate TEXT, -- Alternate forms of the word
+    literal TEXT, -- Literal meaning of the translation
+    qualifier TEXT -- Any extra information
 )
 """)
 
-
-def get_base_word(title: str) -> str:
-    return re.sub(r"\([^)]*\)", "", title)
-
-
-def get_explanations(title: str) -> List[str]:
-    # Find all bracketed text in the page title, i.e. "(this) is a (definition)"
-    # will return (this), (definition)
-    explanations = re.findall(r"\([^)]*\)", title)
-    # Remove brackets from explanation
-    return [re.sub("[\(,\)]", "", x) for x in explanations]
-
-
-root = ElementTree.parse("output/dictionary.xml").getroot()
-for entry in root.findall("entry"):
-    # Add the entry title into the reverse lookup table
-    entry_title = entry.attrib["title"]
-
-    for index, definition_tag in enumerate(entry.findall("definition")):
-        for translation_tag in definition_tag.findall("translation"):
-            translation = translation_tag.text
-
-            base = get_base_word(translation)
-
-            # Ignore super long translation text, since these are usually explanations.
-            # The dictionary can't have keys longer than 128 chars anyway.
-            if len(base) > 32 or base == "":
-                continue
-
-            explanations = ", ".join(get_explanations(translation))
-
-            # Get the context and remove the current word from it
-            context = [get_base_word(x.text) for x in definition_tag.findall("translation")]
-            context.remove(base)
-            context = ", ".join(context)
-
-            parts_of_speech = ", ".join([x.text for x in definition_tag.findall("pos")])
-
-            cursor.execute(
-                "INSERT INTO EnglishTranslations VALUES (?, ?, ?, ?, ?, ?)",
-                (base, explanations, entry_title, context, parts_of_speech, index)
-            )
+for translation in wordlist:
+    parameters = (
+        translation.word,
+        translation.meaning,
+        translation.translation,
+        translation.alternate,
+        translation.literal,
+        translation.qualifier
+    )
+    
+    cursor.execute("INSERT INTO EnglishTranslations VALUES (?, ?, ?, ?, ?, ?)", parameters)
 
 cursor.close()
 db.commit()

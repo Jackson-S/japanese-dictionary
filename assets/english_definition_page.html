@@ -4,24 +4,22 @@
         <h1 id="page_title">{{ entry.page_title }}</h1>
     </section>
 
-    <section id="english_translations">
-        <h3 class="section_heading" apple_mouseover_disable="1">Translations</h3>
-        {% for translation in entry.translations %}
-        <article>
+
+    <section id="definitions">
+        <h3 class="section_heading" apple_mouseover_disable="1">Definitions</h3>
+        {% for definition in entry.translations %}
+        <article class="english_definition">
             <p class="number" apple_mouseover_disable="1">{{ loop.index }}</p>
-            <p class="japanese_translation">{{ translation.japanese_word }}</p>
-            <div class="translation_line">
-                {% for context in translation.context_words %}
-                {% if loop.last %}
-                <p class="context_word">{{ context }}</p>
-                {% else %}
-                <p class="context_word">{{ context }},</p>
-                {% endif %}
-                {% endfor %}
+            <div class="translation_info">
+                <p>{{ definition.meaning }}</p>
             </div>
-            <div class="badges">
-                {% for pos in translation.pos %}
-                <div class="badge">{{ pos }}</div>
+            <div class="translation_line">
+                {% for translation in definition.translations %}
+                {% if loop.last %}
+                <p class="translation">{{ translation.translation }}</p>
+                {% else %}
+                <p class="translation">{{ translation.translation }},</p>
+                {% endif %}
                 {% endfor %}
             </div>
         </article>

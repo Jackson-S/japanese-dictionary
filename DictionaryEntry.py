@@ -57,10 +57,16 @@ class Definition:
 
 
 @dataclass
-class Translation:
-    japanese_word: str
-    context_words: List[str]
-    pos: List[str]
+class EnglishTranslation:
+    translation: str
+    qualifier: Optional[str] = None
+    alternate_form: Optional[str] = None
+    literal_meaning: Optional[str] = None
+
+@dataclass
+class EnglishTranslationSense:
+    meaning: str
+    translations: List[EnglishTranslation]
 
 
 @dataclass
@@ -122,21 +128,17 @@ class JapaneseEntry(Entry):
 class EnglishEntry(Entry):
     def __init__(self, root_word: str):
         super().__init__(root_word, "en", "dictionary")
-        self.translations: List[Translation] = []
+        self.translations: List[EnglishTranslationSense] = []
+        self._translation_guide: Dict[str, EnglishTranslationSense] = dict()
 
-    def add_translation(self, japanese_word: str, context: List[str], parts_of_speech: List[str]):
-        # Reduce the complexity of the part of speech indicator (e.g. "Godan (く)" -> "Verb")
-        simplified_pos: List[str] = self._simplify_parts_of_speech(parts_of_speech)
-
-        # Simplify the context (remove equivalent items)
-        context: List[str] = list(set(context))
-
-        # Add the translation
-        translation = Translation(japanese_word, context, simplified_pos)
-        self.translations.append(translation)
-
-    def _simplify_parts_of_speech(self, speech_parts: List[str]) -> List[str]:
-        return sorted(list({SIMPLIFICATIONS.get(x, x) for x in speech_parts}))
+    def add_translation(self, meaning: str, translation: str, alternate: Optional[str], literal: Optional[str], qualifier: Optional[str]):
+        if meaning not in self._translation_guide:
+            new_sense = EnglishTranslationSense(meaning, [])
+            self.translations.append(new_sense)
+            self._translation_guide[meaning] = new_sense
+        
+        new_translation = EnglishTranslation(translation, alternate, literal, qualifier)
+        self._translation_guide[meaning].translations.append(new_translation)
 
 
 class KanjiEntry(Entry):

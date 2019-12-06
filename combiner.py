@@ -93,14 +93,11 @@ def create_english_pages() -> List[EnglishEntry]:
 
     query = cursor.execute("SELECT * FROM EnglishTranslations")
 
-    for en, expl, jp, context, pos, sense in query.fetchall():
+    for en, mean, trans, alt, lit, qual in query.fetchall():
         if en not in result:
             result[en] = EnglishEntry(en)
         
-        if expl != None:
-            result[en].add_translation(jp, [expl,], pos.split(", "))
-        else:
-            result[en].add_translation(jp, context.split(", "), pos.split(", "))
+        result[en].add_translation(mean, trans, alt, lit, qual)
 
     return list(result.values())
 
