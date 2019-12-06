@@ -3,8 +3,6 @@
     <section id="header">
         <h1 id="page_title">{{ entry.page_title }}</h1>
     </section>
-
-
     <section id="definitions">
         <h3 class="section_heading" apple_mouseover_disable="1">Definitions</h3>
         {% for definition in entry.translations %}
@@ -15,11 +13,7 @@
             </div>
             <div class="translation_line">
                 {% for translation in definition.translations %}
-                {% if loop.last %}
-                <p class="translation">{{ translation.translation }}</p>
-                {% else %}
-                <p class="translation">{{ translation.translation }},</p>
-                {% endif %}
+                <p class="translation">{{ translation.translation }}{% if translation.transliteration %}【{{ translation.transliteration }}】{% endif %}{% if not loop.last %},{% endif %}</p>
                 {% endfor %}
             </div>
         </article>

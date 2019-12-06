@@ -62,6 +62,7 @@ class EnglishTranslation:
     qualifier: Optional[str] = None
     alternate_form: Optional[str] = None
     literal_meaning: Optional[str] = None
+    transliteration: Optional[str] = None
 
 @dataclass
 class EnglishTranslationSense:
@@ -131,13 +132,13 @@ class EnglishEntry(Entry):
         self.translations: List[EnglishTranslationSense] = []
         self._translation_guide: Dict[str, EnglishTranslationSense] = dict()
 
-    def add_translation(self, meaning: str, translation: str, alternate: Optional[str], literal: Optional[str], qualifier: Optional[str]):
+    def add_translation(self, meaning: str, translation: str, alternate: Optional[str], literal: Optional[str], qualifier: Optional[str], transliteration: Optional[str]):
         if meaning not in self._translation_guide:
             new_sense = EnglishTranslationSense(meaning, [])
             self.translations.append(new_sense)
             self._translation_guide[meaning] = new_sense
         
-        new_translation = EnglishTranslation(translation, alternate, literal, qualifier)
+        new_translation = EnglishTranslation(translation, alternate, literal, qualifier, transliteration)
         self._translation_guide[meaning].translations.append(new_translation)
 
 

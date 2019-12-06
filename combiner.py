@@ -93,11 +93,11 @@ def create_english_pages() -> List[EnglishEntry]:
 
     query = cursor.execute("SELECT * FROM EnglishTranslations")
 
-    for en, mean, trans, alt, lit, qual in query.fetchall():
+    for en, mean, trans, translit, alt, lit, qual in query.fetchall():
         if en not in result:
             result[en] = EnglishEntry(en)
         
-        result[en].add_translation(mean, trans, alt, lit, qual)
+        result[en].add_translation(mean, trans, alt, lit, qual, translit)
 
     return list(result.values())
 
